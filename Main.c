@@ -4,20 +4,14 @@
  * use a P89LPC936 with 6Mhz resonator
  * Compiler options: -mmcs51 --iram-size 256 --xram-size 512 --code-size 16368 --std-sdcc89 --model-medium, all optimastions on
  * SDCC 3.2.0
- * 
- * 
- * V2 2013-05-06
- * fix: alarmgflag was not switched off, if device was swithced off by remote signal
- * V1 2013-03-25
- * added option to skip alarms by turning knob in standby
  */
 
 // This file defines registers available in P89LPC93X
 #include <p89lpc935_6.h>
 #include <stdio.h>
 
-#define KeyPressShort	8
-#define KeyPressLong	32
+#define KeyPressShort	15
+#define KeyPressLong	60
 
 #define isrregisterbank	2		//for all isr on the SAME priority level 
 
@@ -30,7 +24,7 @@ unsigned char Minutes2Signal;
 unsigned char DisplayDimCnt;
 
 __bit volatile RefreshTimeRTC;		// next minute, get time from rtc and display it
-__bit volatile Flag40ms;
+__bit volatile TimerFlag;
 __bit RefreshTime;			// get time from rtc and display it
 __bit Alarmflag;
 __bit LightOn;
@@ -57,21 +51,24 @@ void main()
 
 	LCD_Init3V();
 	LCD_SetContrast(Read_EEPROM(EEAddr_LCDContrast));
-	LCD_SendString("Start");
+	LCD_SendString("LCD ok");
 
 	SetupRTC();
 	RefreshTime=1;
+	LCD_SendString("RTC ok");
 
-	//load Ram values from EEPROM
+	//load RAM values from EEPROM
 	Brightness_start[0]=Read_EEPROM(EEAddr_DispBrightness);
 	ReceiverMode=Read_EEPROM(EEAddr_ReceiverMode);
 	SenderMode=Read_EEPROM(EEAddr_SenderMode);
 	RC5Addr=Read_EEPROM(EEAddr_RC5Addr);
+	Update_PWM_Offset(1);
+	Update_PWM_Offset(2);
 
 	// Infinite loop
 	while(1) {
 
-		if (Flag40ms)
+		if (TimerFlag)
 			{
 			PWM_StepDim();			// do next dimming step
 			Alarm_StepDim_all();
@@ -89,7 +86,7 @@ void main()
 				{
 				MeasureExtBrightness();
 				}
-			Flag40ms=0;
+			TimerFlag=0;
 			}
 
 		if (RefreshTime || RefreshTimeRTC)

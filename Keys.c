@@ -1,6 +1,5 @@
 /** Handels keys reading
  *  Hardware CCU of P89LPC93X
- *  V1 2013-01-20
  */
 
 // Encoder and Keys should not overlap in their bits
@@ -16,7 +15,7 @@ volatile unsigned char KeyPressDuration;
 
 void WDT_RTC_isr(void) __interrupt(10) __using(isrregisterbank)	//int from internal RTC to update PWM read keys
 {
-	Flag40ms=1;					//notify main program at 25Hz
+	TimerFlag=1;					//notify main program
 	KeyState = ~KeysPort & SelKeys;			//Get KeysState and invert it
 	//decode keystate and measure time, no release debouncing, so do not call to often
 	if (KeyState)					//Key pressed?

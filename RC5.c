@@ -1,5 +1,4 @@
 /* Function to decode RC5 commands
- * V0 2013-02-06
  */
 
 #define IntT0reload 0x04			//T0 extension to clock RC5 receiver
@@ -14,6 +13,7 @@
 #define maxRC5Address	31		//maximum possible RC5 address
 
 #define RC5Cmd_AlarmStart	53		//code for start of alarm
+#define RC5Cmd_AlarmEnd	54		//code for end of alarm
 #define RC5Cmd_Off	13		//code for light off
 #define RC5Cmd_On		12		//code for light on
 
@@ -307,6 +307,13 @@ void DecodeRemote()
   				if (ComModeAlarm<=ReceiverMode)
   					{
   					Alarm();
+  					}
+  				break;
+  			case RC5Cmd_AlarmEnd:
+  				if (ComModeAlarm<=ReceiverMode)
+  					{
+  					AlarmEnd();
+					LCD_SendBrightness(FocusBacklight+1);
   					}
   				break;
   			case RC5Cmd_Off:

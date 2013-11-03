@@ -1,16 +1,16 @@
 /** Sets all PWM values
  *  Hardware CCU of P89LPC93X
- *  V2 2013-05-09
  */
 
-#define minBrightness	0x08		//avoid reduction to very low brightness values by external light
 #define maxBrightness	0x7F		//avoid overflow with signed numbers, should be filled with 1 from MSB to LSB
-#define DisplayDimCntStart 150		//time until display backlight fades out, max 0xFF
+#define maxRawPWM		0x3FFF		// =  maxBrigntess^2
+#define DisplayDimCntStart 250		//time until display backlight fades out, max 0xFF
 #define startupfocus	1		//focus on back=1 or front=0
-#define fadetime		100
+#define fadetime		150
 
 unsigned char Brightness[3] = {0,0,0};			//current value
 unsigned char Brightness_start[3] = {0x3F,0x3F,0x3F};	//value before lights off
+unsigned int PWM_Offset[3] = {0,0,0};			//PWM value, where the driver effectivly starts to generate an output
 unsigned int ExtBrightness_last = 0x01FFF;			//external brigthness during lights off divided by 256
 
 signed int PWM_set[3] = {0,0,0};				//current pwm value
@@ -28,29 +28,128 @@ void LCD_SendBrightness(unsigned char i)
 	printf_fast("%3d%%        ", displayvalue);
 }
 
-void PWM_StepDim()					//perform next dimming step, must frquently called for dimming action
+void Update_PWM_Offset(unsigned char i)
 {
+	if (0==i)
+		{
+		PWM_Offset[i]=0;				//0 is lcd backlight
+		}
+	else
+		{
+		PWM_Offset[i]  = Read_EEPROM(EEAddr_OffsetFrontBrightness+i-1);
+		PWM_Offset[i] *= PWM_Offset[i];
+		}
+}
+
+void PWM_StepDim()				//perform next dimming step, must frquently called for dimming action
+{
+	unsigned int temp;
 	if (PWM_incr_cnt[0])
 		{
 		PWM_set[0] += PWM_incr[0];
 		--PWM_incr_cnt[0];
-		OCRAH = (PWM_set[0] >> 6) & 0x00FF;	//with signed int we can not reach 0xFF
-		OCRAL = (PWM_set[0] << 2) & 0x00FC;
+		if (PWM_set[0])
+			{
+			OCRAH =  ((PWM_set[0] >> 6) & 0x00FF);
+			OCRAL = (((PWM_set[0] << 2) & 0x00FC) | 0x0003);	//add min pulse width => we do not use full 16 bit resolution & reach PWM = 100% on for Brightness = 0x7F
+			}
+		else
+			{
+			OCRAH = 0;
+			OCRAL = 0;
+			}
 		}
+
 	if (PWM_incr_cnt[1])
 		{
 		PWM_set[1] += PWM_incr[1];
 		--PWM_incr_cnt[1];
-		OCRBH = (PWM_set[1] >> 6) & 0x00FF;
-		OCRBL = (PWM_set[1] << 2) & 0x00FC;
+		if (PWM_set[1])
+			{
+			//with signed int we can not reach 0xFFFF, only 0x3FFF in posssible
+			// including the offset we reach max 0x7FFF, which is just clipped to 0x3FFF
+			temp = (unsigned int)PWM_set[1] + PWM_Offset[1];
+			if (maxRawPWM<temp)
+				{
+				temp=maxRawPWM;
+				}
+			OCRBH =  ((temp >> 6) & 0x00FF);
+			OCRBL = (((temp << 2) & 0x00FC) | 0x0003);	//add min pulse width => we do not use full 16 bit resolution & reach PWM = 100% on for Brightness = 0x7F
+			}
+		else
+			{
+			OCRBH = 0;
+			OCRBL = 0;
+			}
 		}
+
 	if (PWM_incr_cnt[2])
 		{
 		PWM_set[2] += PWM_incr[2];
 		--PWM_incr_cnt[2];
-		OCRCH = (PWM_set[2] >> 6) & 0x00FF;
-		OCRCL = (PWM_set[2] << 2) & 0x00FC;
+		if (PWM_set[2])
+			{
+			//with signed int we can not reach 0xFFFF, only 0x3FFF in posssible
+			// including the offset we reach max 0x7FFF, which is just clipped to 0x3FFF
+			temp = (unsigned int)PWM_set[2] + PWM_Offset[2];
+			if (maxRawPWM<temp)
+				{
+				temp=maxRawPWM;
+				}
+			OCRCH =  ((temp >> 6) & 0x00FF);
+			OCRCL = (((temp << 2) & 0x00FC) | 0x0003);	//add min pulse width => we do not use full 16 bit resolution & reach PWM = 100% on for Brightness = 0x7F
+			}
+		else
+			{
+			OCRCH = 0;
+			OCRCL = 0;
+			}
 		}
+
+
+	// adjust PWM frequency to optain a wider linear range of the PWM
+
+	//find larger PWM value
+	if (PWM_set[1]>PWM_set[2])
+		{
+		temp=PWM_set[1];
+		}
+	else
+		{
+		temp=PWM_set[2];
+		}
+
+	// Resonator / 2 / (PLLSetting+1) * PLL / (CCU prescaler+1) 
+	// 6MHz / 2 / 4 * 32 / 1 = 2^16 * 366.2 Hz
+	// TPCR2L CCU prescaler, low byte
+
+	if (temp>800)
+		{
+		TPCR2L=0;	//366Hz
+		}
+	else if (temp>400)
+		{
+		TPCR2L=1;	//183Hz
+		}
+	else if (temp>200)
+		{
+		TPCR2L=2;	//122Hz
+		}
+	else if (temp>100)
+		{
+		TPCR2L=3;	//91.6Hz
+		}
+	else if (temp>50)
+		{
+		TPCR2L=4;	//73.2Hz
+		}
+	else
+		{
+		TPCR2L=5;	//61.0Hz
+		}
+
+	// lowerr rates are flickering to much and lead to aliasing effects with the LCD
+
 	TCR21 = PLLSetting;	//Set PLL prescaler and start CCU register update
 }
 
@@ -122,6 +221,9 @@ unsigned int sqrt32(unsigned long a)
 void SwLightOn(unsigned char i, unsigned int relBrightness)
 {
 	unsigned long temp;
+	unsigned char minBrightness;					//avoid reduction to very low brightness values by external light
+
+	minBrightness = Read_EEPROM(EEAddr_MinimumFrontBrightness+i-1);	//0 is lcd backlight
 	temp=Brightness_start[i];
 	temp=(temp*relBrightness)>>4;
 	if (maxBrightness < temp)						//limit brightness to maximum
@@ -190,5 +292,36 @@ void SwAllLightOff()
 			}
 		SenderMode=Read_EEPROM(EEAddr_SenderMode);				//reset mode
 		RefreshTime=1;							//refresh display
+		}
+}
+
+
+// better than repetive code above in void PWM_StepDim(), but could not make it work (ligth stays off)
+
+
+void PWM_CalcSet(__near unsigned char *high, __near unsigned char *low, unsigned char i)
+{
+	unsigned int temp;
+	if (PWM_incr_cnt[i])
+		{
+		PWM_set[i] += PWM_incr[i];
+		--PWM_incr_cnt[i];
+		if (PWM_set[i])
+			{
+			//with signed int we can not reach 0xFFFF, only 0x3FFF in posssible
+			// including the offset we reach max 0x7FFF, which is just clipped to 0x3FFF
+			temp = (unsigned int)PWM_set[i] + PWM_Offset[i];
+			if (maxRawPWM<temp)
+				{
+				temp=maxRawPWM;
+				}
+			*high = (unsigned char) ((temp >> 6) & 0x00FF);
+			*low  = (unsigned char) (((temp << 2) & 0x00FC) | 0x0003);	//add min pulse width => we do not use full 16 bit resolution & reach PWM = 100% on for Brightness = 0x7F
+			}
+		else
+			{
+			*high = (unsigned char) 0;
+			*low = (unsigned char) 0;
+			}
 		}
 }
