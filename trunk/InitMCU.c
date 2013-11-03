@@ -1,5 +1,4 @@
 /** Setup MCU for LED Leuchte
- *  V0 2013-01-15
  */
 
 //Devide by last 4 Bit + 1; MSB is start signal
@@ -92,9 +91,9 @@ void InitMCU()
 	//Read AD0DAT0, 1, 2, 3, 0, ...
 
 	//Init RTC of P89LPC93X
-	// config RTC as Timer with 6*10^6/128/25=1875 reload => 25Hz int source
-    	RTCH = 0x07; 
-    	RTCL = 0x53;
+	// config RTC as Timer with 6*10^6/128/40=1172 reload => 40Hz int source
+    	RTCH = 0x04; 
+    	RTCL = 0x94;
     	RTCCON = RTCdis;
 	//enable when configured
 
@@ -104,9 +103,12 @@ void InitMCU()
 	//Init CCU
     	TICR2  = 0b00000000;	//disable CCU interrupts
 	TPCR2H = 0b00000000;	//CCU prescaler, high byte
-	TPCR2L = 0b00000011;	//CCU prescaler, low byte
                              	// Resonator / 2 / (PLLSetting+1) * PLL / (CCU prescaler+1) 
+                             	//low byte will be set later dynamicly
                              	// 6MHz / 2 / 4 * 32 / 4 = 2^16 * 91.55 Hz
+	TPCR2L = 0b00000011;	//CCU prescaler, low byte
+
+
 	TOR2H = 0xFF;		//Setup reload values for CCU timer, here 2^16-1
     	TOR2L = 0xFF;
     	CCCRA = 0b00000001;	//output compare: non-inverted PWM for LCD backlight

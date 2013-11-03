@@ -1,8 +1,6 @@
 /**
  * Options of LED Leuchte incl. EEPROM access and Alarm
  * @file Options.h
- * 
- * V2 2013-05-09
  */
 
 #ifndef __Options_H_GUARD
@@ -19,10 +17,13 @@
 #define EEAddr_AlarmTimeSnooze 7		//Snooze Time
 #define EEAddr_ReceiverMode 8
 #define EEAddr_SenderMode 9
-//spare address
-#define EEAddr_AlarmOffset 11		//Address offset of the alarms
+#define EEAddr_MinimumFrontBrightness 10	//Brightness of the frontlight during power on
+#define EEAddr_MinimumBackBrightness 11	//Brightness of the backlight during power on, address must follow MinimumFrontBrightness!!!
+#define EEAddr_OffsetFrontBrightness 12	//Brightness Offset of the frontlight
+#define EEAddr_OffsetBackBrightness 13	//Brightness Offset of the backlight
+#define EEAddr_AlarmOffset 14		//Address offset of the alarms
 
-#define maxOption 13
+#define maxOption 17
 #define maxAlarm 6
 
 #define daysinweek 7
@@ -39,8 +40,12 @@
 #define sizeAlarm 3
 #define sizeEEPROM (EEAddr_AlarmOffset+sizeAlarm*(maxAlarm+1))
 
+#define maxAlarmEndMode 4
 #define maxComMode 3
-				//the followingen three values have to be held consistend manually!
+
+#define menutimeout 184630		//timeout = 10s defined by RC5 irq frequency
+
+				//the following three values have to be held consistend manually!
 #define skipAlarmStepping 3	//2^skipAlarmStepping number of steps required to change skipAlarmCnt, should multiplied by maxAlarm not exceed unsigned char
 #define skipAlarmhalfStep 4	// = (2^(skipAlarmStepping-1)   savety margin to alow for backlight, but avoid alarm change
 #define skipAlarmMask 0xF8		// = (0x100-(2^skipAlarmStepping))
@@ -55,7 +60,7 @@ unsigned char RC5Addr;
 unsigned char ReceiverMode;
 unsigned char SenderMode;
 
-__code unsigned char initEEPROMdata[sizeEEPROM] = {0, 12, 0x40, 16, 0x20, 0x80, 11, 6, 2, 2, 0xFF,
+__code unsigned char initEEPROMdata[sizeEEPROM] = {0, 12, 0x40, 16, 0x20, 0x80, 11, 6, 2, 2, 7, 7, 1, 1,
 						6, 0, 1, 6, 0, 2, 6, 0, 3, 6, 0, 4, 6, 0, 5, 8, 0, 6, 8, 0, 7};
 
 __code char OptionNames[maxOption+1][15] = {"Set Alarm     ",
@@ -67,15 +72,19 @@ __code char OptionNames[maxOption+1][15] = {"Set Alarm     ",
 				 	 "Snooze Time   ",
 				 	 "Receiver Mode ",
 				 	 "Sender Mode   ",
+				 	 "Min. Front    ",
+				 	 "Min. Back     ",
+				 	 "Offset Front  ",
+				 	 "Offset Back   ",
 				 	 "LCD Backlight ",
 				 	 "LCD Contrast  ",
 				 	 "Set RC Address",
 				 	 "Reset settings",
-				 	 "V2 2013-05-09 "};
+				 	 "V3 2013-11-03 "};
 
 __code char noyestext[2][4] = {" no", "yes"};
 
-__code char SnoozeEndtext[2][15] = {"Keep Snooze  ", "End Alarm    "};
+__code char SnoozeEndtext[maxAlarmEndMode+1][15] = {"Keep Snooze   ", "End Alarm     ", "End all Alarm ", "Go Standby    ", "All go Standby"};
 
 __code char ComModetext[maxComMode+1][10] = {"off      ", "Alarm    ", "condional", "all      "};
 
@@ -99,6 +108,9 @@ void WriteAlarmEEPROM(unsigned char AlarmNo, unsigned char *curAlarm);
 void LCD_AlarmSnoozeEnd(unsigned char j);
 
 //stop count down to acustic alarm
+void AlarmEnd();
+
+//menu to stop count down to acustic alarm
 void AlarmSnoozeEnd();
 
 //display an alarm from EEPROM in 2nd line

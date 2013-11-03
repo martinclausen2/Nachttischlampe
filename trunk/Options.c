@@ -1,8 +1,6 @@
 /**
  * Options of LED Leuchte incl. EEPROM access and Alarm
  * @file Options.c
- * 
- * V2 2013-05-09
  */
 
 #include <p89lpc935_6.h>
@@ -53,27 +51,53 @@ void LCD_AlarmSnoozeEnd(unsigned char j)
 }
 
 //stop count down to acustic alarm
+void AlarmEnd()
+{
+	Minutes2Signal=0;
+	RefreshTime=1;
+}
+
+//menu to stop count down to acustic alarm
 void AlarmSnoozeEnd()
 {
 	unsigned long i;
 	unsigned char j = 0;			//set to "snooze" = 0
 	LCD_AlarmSnoozeEnd(j);
 
-	for(i=184630; i; i--)			//timeout = 10s defined by RC5 irq frequency
+	for(i=menutimeout; i; i--)
 		{
-		if(!CheckKeyPressed())
+		if((!CheckKeyPressed()) || ((12==rCounter) && (RC5Addr==rAddress || RC5Addr_front==rAddress || RC5Addr_back==rAddress || RC5Addr_com==rAddress)))
 			{
-			break;
+			break;			//exit on key pressed or RC5 command received
 			}
-		else if (EncoderSetupValue(&j, 1,0))
+		else if (EncoderSetupValue(&j, maxAlarmEndMode,0))
 			{
 			LCD_AlarmSnoozeEnd(j);
+			i=menutimeout;		//reset timeout due to user action
 			}
 		PCON=MCUIdle;			//go idel, wake up by any int
 		}
-	if (j)
+	// 0==j, nothing to do: timeout, RC5 command received or user keeps snooze
+	// 0==i, timeout
+	if (0!=j && 0!=i)			//end alarm
 		{
-		Minutes2Signal=0;
+		AlarmEnd();
+		if (2==j || 4==j)
+			{	//send end alarm via RC5, send anyway since use selected to do so
+			SendRC5(RC5Addr_com, RC5Cmd_AlarmEnd, 1, ComModeOff, RC5Cmd_Repeats);
+			}
+		if (4==j)
+			{	//send standby via RC5, send anyway since use selected to do so
+			SendRC5(RC5Addr_com, RC5Cmd_Off, 1, ComModeOff, RC5Cmd_Repeats);
+			}
+		if (3<=j)
+			{	//goto standby
+			SwAllLightOff();
+			}
+		if (3>j)
+			{
+			LCD_SendBrightness(FocusBacklight+1);
+			}
 		}
 	RefreshTime=1;
 }
@@ -260,7 +284,7 @@ void LCD_NextAlarm()			//Checks for the next alarm and show it on the display
 	else
 		{
 		LCD_SendCmd(LCDSet2ndLine);
-		LCD_SendString("Standby      ");
+		LCD_SendString("Standby         ");
 		}
 }
 
@@ -621,15 +645,31 @@ void Options()
 						SenderMode=Read_EEPROM(EEAddr_SenderMode);
 						break;
 					case 9:
-						SetupBrightness(EEAddr_DispBrightness, 0);
+						SetupBrightness(EEAddr_MinimumFrontBrightness, 1);
 						break;
 					case 10:
-						SetupContrast();
+						SetupBrightness(EEAddr_MinimumBackBrightness, 2);
 						break;
 					case 11:
-						SetupRCAddress();
+						PWM_Offset[1]=0;
+						SetupBrightness(EEAddr_OffsetFrontBrightness, 1);
+						Update_PWM_Offset(1);
 						break;
 					case 12:
+						PWM_Offset[2]=0;
+						SetupBrightness(EEAddr_OffsetBackBrightness, 2);
+						Update_PWM_Offset(2);
+						break;
+					case 13:
+						SetupBrightness(EEAddr_DispBrightness, 0);
+						break;
+					case 14:
+						SetupContrast();
+						break;
+					case 15:
+						SetupRCAddress();
+						break;
+					case 16:
 						InitEEPROM();
 						break;
 					}

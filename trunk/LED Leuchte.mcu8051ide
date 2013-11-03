@@ -263,18 +263,18 @@
 		/>
 	</general>
 	<other_options><![CDATA[]]></other_options>
-	<compiler_options><![CDATA[{_title 0 _list 0 _print 0 _nomod 0 max_ihex_rec_length 255 _object 0 _pagelength 0 QUIET 0 _symbols 0 CREATE_SIM_FILE 1 CREATE_BIN_FILE 1 optim_ena 0 _pagewidth 0 WARNING_LEVEL 0 _paging 0 _date 0} 0 {--verbose 1 -i {} --omf-51 0 --columns 0 custom {}} {adf 1} {-L 1 -M 0 custom {} -n 0 -P 0 -A 0 -a 0 -r {} -C 0 -c 0 -s 1 -u 0 -U 0 -w 0 -g MAP -quiet 0 -h 0 -x 0 -cpu 8051 -I 1 -i {}} {ihex 1 adf 1} {--out-fmt-s19 0 --fdollars-in-identifiers 0 --nogcse 0 --nooverlay 0 --no-peep-comments 0 --no-c-code-in-asm 0 --print-search-dirs 0 --nostdlib 0 --cyclomatic 0 --compile-only 0 --peep-asm 0 --nolabelopt 0 --short-is-8bits 0 --profile 0 --noinvariant 0 --no-reg-params 0 --noinduction 0 --out-fmt-ihx 0 --nojtbound 0 --opt-code-size 0 --less-pedantic 0 --no-peep 0 -S 0 --verbose 1 --funsigned-char 0 --xstack 0 --no-xinit-opt 0 --debug 1 --preprocessonly 0 --c1mode 0 -V 1 --float-reent 0 --parms-in-bank1 0 --opt-code-speed 0 --nostdinc 0 --main-return 0 --xram-movc 0 --fommit-frame-pointer 0 --fverbose-asm 0 --int-long-reent 0 --all-callee-saves 0 --stack-probe 0 --noloopreverse 0 --stack-auto 0 --use-stdout 0} {model --model-medium standard --std-sdcc89 stack --pack-iram custom {}} {--codeseg {} --constseg {} --code-loc {} --stack-size {} --xram-loc {} --lib-path {} --xstack-loc {} --stack-loc {} --data-loc {}} {-l {} -L {} --disable-warning {} -I {}} {-l 1 -A {} -F hex custom {}} {adf 1}]]></compiler_options>
+	<compiler_options><![CDATA[{_title 0 _list 0 _print 0 _nomod 0 max_ihex_rec_length 255 _object 0 _pagelength 0 QUIET 0 _symbols 0 CREATE_SIM_FILE 1 CREATE_BIN_FILE 1 optim_ena 0 _pagewidth 0 WARNING_LEVEL 0 _paging 0 _date 0} 0 {--verbose 1 -i {} --omf-51 0 --columns 0 custom {}} {adf 1} {-L 1 -M 0 custom {} -n 0 -P 0 -A 0 -a 0 -r {} -C 0 -c 0 -s 1 -u 0 -U 0 -w 0 -g MAP -quiet 0 -h 0 -x 0 -cpu 8051 -I 1 -i {}} {ihex 1 adf 1} {--out-fmt-s19 0 --fdollars-in-identifiers 0 --nogcse 0 --nooverlay 0 --no-peep-comments 0 --no-c-code-in-asm 0 --print-search-dirs 0 --nostdlib 0 --nolabelopt 0 --short-is-8bits 0 --cyclomatic 0 --compile-only 0 --peep-asm 0 --profile 0 --noinvariant 0 --no-reg-params 0 --noinduction 0 --out-fmt-ihx 0 --nojtbound 0 --opt-code-size 0 --less-pedantic 0 --no-peep 0 -S 0 --verbose 1 --funsigned-char 0 --xstack 0 --no-xinit-opt 0 --debug 1 --preprocessonly 0 --c1mode 0 -V 1 --float-reent 0 --parms-in-bank1 0 --opt-code-speed 0 --nostdinc 0 --main-return 0 --xram-movc 0 --fommit-frame-pointer 0 --fverbose-asm 0 --int-long-reent 0 --all-callee-saves 0 --stack-probe 0 --noloopreverse 0 --stack-auto 0 --use-stdout 0} {model --model-medium standard --std-sdcc89 stack --pack-iram custom {}} {--codeseg {} --constseg {} --code-loc {} --stack-size {} --xram-loc {} --lib-path {} --xstack-loc {} --stack-loc {} --data-loc {}} {-l {} -L {} --disable-warning {} -I {}} {-l 1 -A {} -F hex custom {}} {adf 1}]]></compiler_options>
 	<files
 		count="13"
-		current_file="0"
+		current_file="9"
 		current_file2="-1"
 		pwin_sash="0"
 		selected_view="0"
 		pwin_orient="horizontal">
 
 		<file name="Main.c" active="yes" o_bookmark="0" p_bookmark="0" file_index="0" read_only="0" highlight="1">
-			<actual_line value="60"/>
-			<md5_hash value="6F9E5DDA4F4D3679F9A1FF05C14669D8"/>
+			<actual_line value="14"/>
+			<md5_hash value="070E1943BDA6DF328AE0594BF047080F"/>
 			<path><![CDATA[]]></path>
 			<bookmarks>
 				0
@@ -288,7 +288,7 @@
 		</file>
 
 		<file name="LCD_EA_DOG_SPI.c" active="yes" o_bookmark="0" p_bookmark="0" file_index="1" read_only="0" highlight="1">
-			<actual_line value="59"/>
+			<actual_line value="87"/>
 			<md5_hash value="FF3C0CF4335DF835C5C8D23D0CDD9200"/>
 			<path><![CDATA[]]></path>
 			<bookmarks>
@@ -318,8 +318,8 @@
 		</file>
 
 		<file name="InitMCU.c" active="yes" o_bookmark="0" p_bookmark="0" file_index="3" read_only="0" highlight="1">
-			<actual_line value="145"/>
-			<md5_hash value="58BD5EE9C2E3394BAAACE98B8602AB92"/>
+			<actual_line value="96"/>
+			<md5_hash value="F3B1483AAD2A581166D4FDEBD5161098"/>
 			<path><![CDATA[]]></path>
 			<bookmarks>
 				0
@@ -378,8 +378,8 @@
 		</file>
 
 		<file name="RC5.c" active="yes" o_bookmark="0" p_bookmark="0" file_index="7" read_only="0" highlight="1">
-			<actual_line value="262"/>
-			<md5_hash value="DD9F86760378A2DE648F4DB117BE7F07"/>
+			<actual_line value="317"/>
+			<md5_hash value="D59E03C97E4C7DAD5E63F33F5E69F453"/>
 			<path><![CDATA[]]></path>
 			<bookmarks>
 				0
@@ -393,8 +393,8 @@
 		</file>
 
 		<file name="Options.c" active="yes" o_bookmark="0" p_bookmark="0" file_index="8" read_only="0" highlight="1">
-			<actual_line value="263"/>
-			<md5_hash value="619728BE84C5C4CEB2FAE9AECA03C7A8"/>
+			<actual_line value="651"/>
+			<md5_hash value="15A0B3452AC8AC10166BCA849CD3EFE1"/>
 			<path><![CDATA[]]></path>
 			<bookmarks>
 				0
@@ -408,8 +408,8 @@
 		</file>
 
 		<file name="SetBrightness.c" active="yes" o_bookmark="0" p_bookmark="0" file_index="9" read_only="0" highlight="1">
-			<actual_line value="12"/>
-			<md5_hash value="666853EC6E4067C61FE9C2CFCBD85E32"/>
+			<actual_line value="134"/>
+			<md5_hash value="B03CA38F034F22269DA610F682D647A5"/>
 			<path><![CDATA[]]></path>
 			<bookmarks>
 				0
@@ -438,8 +438,8 @@
 		</file>
 
 		<file name="Options.h" active="yes" o_bookmark="0" p_bookmark="0" file_index="11" read_only="0" highlight="1">
-			<actual_line value="70"/>
-			<md5_hash value="DC6A84E70DE870C33BF9F9627F67AEBD"/>
+			<actual_line value="63"/>
+			<md5_hash value="7ED83A39AEBEC8E2B9E9869138B70F74"/>
 			<path><![CDATA[]]></path>
 			<bookmarks>
 				0
@@ -453,8 +453,8 @@
 		</file>
 
 		<file name="Keys.c" active="yes" o_bookmark="0" p_bookmark="0" file_index="12" read_only="0" highlight="1">
-			<actual_line value="48"/>
-			<md5_hash value="C5F051D963C43434574B7A145EBA9079"/>
+			<actual_line value="3"/>
+			<md5_hash value="F5E4534AD54492C53409F6C88C1F4EF9"/>
 			<path><![CDATA[]]></path>
 			<bookmarks>
 				0
