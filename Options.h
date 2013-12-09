@@ -80,13 +80,15 @@ __code char OptionNames[maxOption+1][15] = {"Set Alarm     ",
 				 	 "LCD Contrast  ",
 				 	 "Set RC Address",
 				 	 "Reset settings",
-				 	 "V3 2013-11-03 "};
+				 	 "V4 2013-12-08 "};
 
 __code char noyestext[2][4] = {" no", "yes"};
 
-__code char SnoozeEndtext[maxAlarmEndMode+1][15] = {"Keep Snooze   ", "End Alarm     ", "End all Alarm ", "Go Standby    ", "All go Standby"};
+__code char SnoozeEndtext[maxAlarmEndMode+1][15] = {"Keep Snooze   ", "End Alarm     ", "End All Alarm ", "Go Standby    ", "All Go Standby"};
 
-__code char ComModetext[maxComMode+1][10] = {"off      ", "Alarm    ", "condional", "all      "};
+__code char ComModetext[maxComMode+1][10] = {"Off      ", "Alarm    ", "Condional", "All      "};
+
+__code char Alarmtext[]   = "Alarm!";
 
 #define ComModeOff	0
 #define ComModeAlarm	1

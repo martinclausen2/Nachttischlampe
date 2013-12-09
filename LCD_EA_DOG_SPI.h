@@ -6,6 +6,8 @@
 #ifndef __LCD_H_GUARD
 #define __LCD_H_GUARD 1
 
+#define charPerLine 16
+
 #define LCD_CSB P2_4
 #define LCDRS P2_7
 // LCD3 for 3,3V Display EA DOGM162

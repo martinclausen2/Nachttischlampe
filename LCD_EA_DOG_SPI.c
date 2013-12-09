@@ -86,12 +86,33 @@ void LCD_SetContrast(unsigned char Contrast)
 
 void LCD_SendString(__code unsigned char *var)
 {
-     while(*var)			//till string ends
-	{
-     	LCD_SendData(*var++);	//send characters one by one
-     	}
+         while(*var)			//till string ends
+		{
+     		LCD_SendData(*var++);	//send characters one by one
+     		}
 }
 
+void LCD_SendString2ndLine(__code unsigned char *var)
+{
+	LCD_SendCmd(LCDSet2ndLine);
+	LCD_SendString(&*var);
+}
+
+
+void LCD_SendStringFill2ndLine(__code unsigned char *var)
+{
+     	unsigned char i = charPerLine;
+     	LCD_SendCmd(LCDSet2ndLine);
+     	while(*var)			//till string ends
+		{
+     		LCD_SendData(*var++);	//send characters one by one
+     		i--;
+     		}
+     	for(;i>0;i--)			//fill with space
+     	{
+     		LCD_SendData(0x020);
+     	}
+}
 
 // Init LCD, for 3V, Coursor off
 void LCD_Init3V()

@@ -10,7 +10,7 @@
 #include <p89lpc935_6.h>
 #include <stdio.h>
 
-#define KeyPressShort	15
+#define KeyPressShort	20
 #define KeyPressLong	60
 
 #define isrregisterbank	2		//for all isr on the SAME priority level 
@@ -44,6 +44,7 @@ __bit FocusBacklight;
 #include "Options.c"
 #include "AcusticAlarm.c"
 
+
 /** Main loop */
 void main()
 {
@@ -51,11 +52,11 @@ void main()
 
 	LCD_Init3V();
 	LCD_SetContrast(Read_EEPROM(EEAddr_LCDContrast));
-	LCD_SendString("LCD ok");
+	LCD_SendString("LCD ok ");
 
 	SetupRTC();
 	RefreshTime=1;
-	LCD_SendString("RTC ok");
+	LCD_SendString("RTC ok ");
 
 	//load RAM values from EEPROM
 	Brightness_start[0]=Read_EEPROM(EEAddr_DispBrightness);
@@ -87,6 +88,82 @@ void main()
 				MeasureExtBrightness();
 				}
 			TimerFlag=0;
+
+			// check keys here since we can have only new input if timerflag was set by the keys interrupt program
+
+			// Select key is pressed
+			if (KeySelect == KeyState)
+				{
+				SwBackLightOn(fadetime);			//switch on or stay on
+				if (Minutes2Signal)
+					{
+					if(0 == KeyPressDuration)
+						{
+						LCD_SendStringFill2ndLine("Set Snooze End");
+						}
+					}
+				else if (KeyPressShort == KeyPressDuration)
+					if (LightOn)
+						{
+						LCD_SendStringFill2ndLine("Enter Standby");
+						}
+					else
+						{
+						LCD_SendStringFill2ndLine("Switch All On");
+						}
+				else if (KeyPressLong == KeyPressDuration)
+					{
+					LCD_SendStringFill2ndLine("Enter Options");
+					}
+				}
+
+			// A Key was pressed if OldKeyState != 0 and Keystate = 0
+			// OldKeyState = 0 must be set by receiving program after decoding as a flag
+			else if ((KeySelect == OldKeyState) && (0 == KeyState))
+				{
+				OldKeyState=0;				//Ack any key anyway
+				if (Minutes2Signal)
+					{
+					AlarmSnoozeEnd();
+					}
+				else if (KeyPressShort > KeyPressDuration)
+					{
+					if (LightOn) 
+						{
+						FocusBacklight=!FocusBacklight;
+						LCD_SendBrightness(FocusBacklight+1);
+						}
+					else
+						{
+						SendRC5(RC5Addr_com, RC5Cmd_On, 1, ComModeAll, RC5Cmd_Repeats);
+						SwAllLightOn();
+						}
+					}
+				else if (KeyPressLong > KeyPressDuration)
+					if (LightOn)
+						{
+						SendRC5(RC5Addr_com, RC5Cmd_Off, 1, ComModeAll, RC5Cmd_Repeats);
+						SwAllLightOff();
+						}
+					else
+						{
+						if (ComModeConditional<=SenderMode)			//reset to eeprom value in swalllightoff()
+							{
+							SenderMode=ComModeAll;
+							}
+						SendRC5(RC5Addr_com, RC5Cmd_On, 1, ComModeAll, RC5Cmd_Repeats);
+						SwAllLightOn();
+						}
+				else
+					{
+					Alarmflag=0;
+					Options();
+					if (LightOn)
+						{
+						LCD_SendBrightness(FocusBacklight+1);
+						}
+					}
+				}
 			}
 
 		if (RefreshTime || RefreshTimeRTC)
@@ -111,8 +188,8 @@ void main()
 				}
 			else if (1 == Minutes2Signal)
 				{
-				LCD_SendCmd(LCDSet2ndLine);
-				printf_fast("Alarm!          ");
+				SwBackLightOn(1);			//switch on now
+				LCD_SendStringFill2ndLine(&Alarmtext[0]);
 				AcusticDDSAlarm();
 				Minutes2Signal=Read_EEPROM(EEAddr_AlarmTimeSnooze);	//start snooze
 				}
@@ -123,57 +200,6 @@ void main()
 		if (12==rCounter)
 			{
 			DecodeRemote();
-			}
-
-		// A Key was pressed if OldKeyState != 0 and Keystate = 0
-		// OldKeyState = 0 must be set by receiving program after decoding as a flag
-		if ((KeySelect == OldKeyState) && (0 == KeyState))
-			{
-			OldKeyState=0;				//Ack any key anyway
-			SwBackLightOn(fadetime);
-			if (Minutes2Signal)
-				{
-				SwBackLightOn(1);			//Switch LCD backlight instantly on
-				AlarmSnoozeEnd();
-				}
-			else if (KeyPressShort > KeyPressDuration)
-				{
-				if (LightOn) 
-					{
-					FocusBacklight=!FocusBacklight;
-					LCD_SendBrightness(FocusBacklight+1);
-					}
-				else
-					{
-					SendRC5(RC5Addr_com, RC5Cmd_On, 1, ComModeAll, RC5Cmd_Repeats);
-					SwAllLightOn();
-					}
-				}
-			else if (KeyPressLong > KeyPressDuration)
-				if (LightOn)
-					{
-					SendRC5(RC5Addr_com, RC5Cmd_Off, 1, ComModeAll, RC5Cmd_Repeats);
-					SwAllLightOff();
-					}
-				else
-					{
-					if (ComModeConditional<=SenderMode)			//reset to eeprom value in swalllightoff()
-						{
-						SenderMode=ComModeAll;
-						}
-					SendRC5(RC5Addr_com, RC5Cmd_On, 1, ComModeAll, RC5Cmd_Repeats);
-					SwAllLightOn();
-					}
-			else
-				{
-				Alarmflag=0;
-				SwBackLightOn(1);			//Switch LCD backlight instantly on
-				Options();
-				if (LightOn)
-					{
-					LCD_SendBrightness(FocusBacklight+1);
-					}
-				}
 			}
 
 		// A Rotation occured if EncoderSteps!= 0
