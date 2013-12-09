@@ -301,7 +301,6 @@ void SetupAlarm(unsigned char AlarmNo)
 	ReadAlarmEEPROM(AlarmNo, &curAlarm[0]);
 	LCD_ClearDisplay();
 	printf_fast("Alarm %d ", AlarmNo);
-	LCD_SendCmd(LCDSet2ndLine);
 	LCD_SetupAlarm(j, &curAlarm[0]);
 	LCD_SendCmd(LCDCursorOn);
 	for(j=0; j<sizeAlarm; j++)
@@ -336,9 +335,10 @@ void SelectAlarm()
 	while(stay)
 		{
 		// Select key is pressed
-		if (KeySelect == KeyState && KeyPressShort == KeyPressDuration)
+		if (TimerFlag && KeySelect == KeyState && KeyPressShort == KeyPressDuration)
 			{
 			LCD_SendStringFill2ndLine("Exit Alarms");
+			TimerFlag=0;
 			}
 
 		// A Key was pressed if OldKeyState != 0 and Keystate = 0
@@ -611,9 +611,10 @@ void Options()
 	while(stay)
 		{
 		// Select key is pressed
-		if (KeySelect == KeyState && KeyPressShort == KeyPressDuration)
+		if (TimerFlag && KeySelect == KeyState && KeyPressShort == KeyPressDuration)
 			{
 			LCD_SendStringFill2ndLine("Exit Options");
+			TimerFlag = 0;
 			}
 
 		// A Key was pressed if OldKeyState != 0 and Keystate = 0

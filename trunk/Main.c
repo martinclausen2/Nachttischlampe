@@ -140,6 +140,7 @@ void main()
 						}
 					}
 				else if (KeyPressLong > KeyPressDuration)
+					{
 					if (LightOn)
 						{
 						SendRC5(RC5Addr_com, RC5Cmd_Off, 1, ComModeAll, RC5Cmd_Repeats);
@@ -154,6 +155,7 @@ void main()
 						SendRC5(RC5Addr_com, RC5Cmd_On, 1, ComModeAll, RC5Cmd_Repeats);
 						SwAllLightOn();
 						}
+					}
 				else
 					{
 					Alarmflag=0;

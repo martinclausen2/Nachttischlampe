@@ -1,6 +1,5 @@
 /** LCD Type Electronic Assembly DOG-M 
  *  Interface using Hardware SPI of P89LPC93X running at 6MHz and DIVM=0
- *  V0 2013-01-27
  */
 
 #include <p89lpc935_6.h>
@@ -108,7 +107,7 @@ void LCD_SendStringFill2ndLine(__code unsigned char *var)
      		LCD_SendData(*var++);	//send characters one by one
      		i--;
      		}
-     	for(;i>0;i--)			//fill with space
+     	for(;i>0;i--)			//fill remainder with space
      	{
      		LCD_SendData(0x020);
      	}
