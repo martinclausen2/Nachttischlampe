@@ -256,7 +256,7 @@ void SwLightOff(unsigned char i)
 
 void SwBackLightOn(signed int steps)
 {
-	if (!DisplayDimCnt)						// do not call twice to avoid instand light on
+	if (!DisplayDimCnt)						// do not call twice while active to avoid instand light on
 		{
 		Brightness[0]=Brightness_start[0];
 		PWM_SetupDim(0, steps, 0);

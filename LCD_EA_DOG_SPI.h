@@ -1,6 +1,5 @@
 /** LCD Type Electronic Assembly DOG-M 
  *  Interface using Hardware SPI of P89LPC93X running at 6MHz and DIVM=0
- *  V0 2012-10-14
  */
 
 #ifndef __LCD_H_GUARD
