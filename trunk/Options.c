@@ -46,8 +46,7 @@ void WriteAlarmEEPROM(unsigned char AlarmNo, unsigned char *curAlarm)
 void LCD_AlarmSnoozeEnd(unsigned char j)
 {
 	RC5Addr=Read_EEPROM(EEAddr_RC5Addr);
-	LCD_SendCmd(LCDSet2ndLine);
-	LCD_SendString(&SnoozeEndtext[j][0]);
+	LCD_SendString2ndLine(&SnoozeEndtext[j][0]);
 }
 
 //stop count down to acustic alarm
@@ -66,6 +65,12 @@ void AlarmSnoozeEnd()
 
 	for(i=menutimeout; i; i--)
 		{
+		if (TimerFlag)
+			{
+			PWM_StepDim();		// do next dimming step to permit LCD backlight fadein to finish
+			TimerFlag=0;
+			}
+
 		if((!CheckKeyPressed()) || ((12==rCounter) && (RC5Addr==rAddress || RC5Addr_front==rAddress || RC5Addr_back==rAddress || RC5Addr_com==rAddress)))
 			{
 			break;			//exit on key pressed or RC5 command received
@@ -88,6 +93,7 @@ void AlarmSnoozeEnd()
 			}
 		if (4==j)
 			{	//send standby via RC5, send anyway since use selected to do so
+			CommandPause();		//wait after sending AlarmEnd required
 			SendRC5(RC5Addr_com, RC5Cmd_Off, 1, ComModeOff, RC5Cmd_Repeats);
 			}
 		if (3<=j)
@@ -189,8 +195,7 @@ void Alarm()
 			}
 		else
 			{
-			LCD_SendCmd(LCDSet2ndLine);
-			printf_fast("Alarm!        ");
+			LCD_SendString2ndLine(&Alarmtext[0]);
 			}
 		}
 }
@@ -283,8 +288,7 @@ void LCD_NextAlarm()			//Checks for the next alarm and show it on the display
 		}
 	else
 		{
-		LCD_SendCmd(LCDSet2ndLine);
-		LCD_SendString("Standby         ");
+		LCD_SendStringFill2ndLine("Standby");
 		}
 }
 
@@ -331,9 +335,15 @@ void SelectAlarm()
 	LCD_SelectAlarm(AlarmNo);
 	while(stay)
 		{
+		// Select key is pressed
+		if (KeySelect == KeyState && KeyPressShort == KeyPressDuration)
+			{
+			LCD_SendStringFill2ndLine("Exit Alarms");
+			}
+
 		// A Key was pressed if OldKeyState != 0 and Keystate = 0
 		// OldKeyState = 0 must be set by receiving program after decoding as a flag
-		if ((KeySelect == OldKeyState) && (0 == KeyState))
+		else if ((KeySelect == OldKeyState) && (0 == KeyState))
 			{
 			OldKeyState=0;
 			if (KeyPressShort > KeyPressDuration)
@@ -522,8 +532,7 @@ void SetupRCAddress()
 
 void LCD_InitEEPROMYN(unsigned char j)
 {
-	LCD_SendCmd(LCDSet2ndLine);
-	printf_fast("Reset? ");
+	LCD_SendString2ndLine("Reset? ");
 	LCD_SendString(&noyestext[j][0]);
 }
 
@@ -555,8 +564,7 @@ void InitEEPROM()					//reset EEPROM to default
 
 void LCD_ComMode(unsigned char j)
 {
-	LCD_SendCmd(LCDSet2ndLine);
-	LCD_SendString(&ComModetext[j][0]);
+	LCD_SendString2ndLine(&ComModetext[j][0]);
 }
 
 //Setup communication mode
@@ -579,14 +587,13 @@ void SetupComMode(unsigned char EEPROM_Address)
 //Display the current Option
 void LCD_CurrentOption(unsigned char Option)
 {
-	LCD_SendCmd(LCDSet2ndLine);
-	LCD_SendString(&OptionNames[Option][0]);
+	LCD_SendString2ndLine(&OptionNames[Option][0]);
 }
 
 void LCD_Option(unsigned char Option)
 {
 	LCD_ClearDisplay();
-	LCD_SendString("Option");
+	LCD_SendString("Options");
 	LCD_CurrentOption(Option);
 }
 
@@ -603,9 +610,15 @@ void Options()
 
 	while(stay)
 		{
+		// Select key is pressed
+		if (KeySelect == KeyState && KeyPressShort == KeyPressDuration)
+			{
+			LCD_SendStringFill2ndLine("Exit Options");
+			}
+
 		// A Key was pressed if OldKeyState != 0 and Keystate = 0
 		// OldKeyState = 0 must be set by receiving program after decoding as a flag
-		if ((KeySelect == OldKeyState) && (0 == KeyState))
+		else if ((KeySelect == OldKeyState) && (0 == KeyState))
 			{
 			if (KeyPressShort > KeyPressDuration)
 				{

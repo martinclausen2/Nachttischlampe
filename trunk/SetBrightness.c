@@ -23,8 +23,7 @@ void LCD_SendBrightness(unsigned char i)
 {
 	unsigned int displayvalue;
 	displayvalue = (Brightness[i]*202) >> 8;		//scale to 100%
-	LCD_SendCmd(LCDSet2ndLine);
-	LCD_SendString(&LedNames[i][0]);
+	LCD_SendString2ndLine(&LedNames[i][0]);
 	printf_fast("%3d%%        ", displayvalue);
 }
 
@@ -255,11 +254,14 @@ void SwLightOff(unsigned char i)
 	PWM_SetupDim(i, fadetime, 0);
 }
 
-void SwBackLightOn(unsigned char steps)
+void SwBackLightOn(signed int steps)
 {
-	Brightness[0]=Brightness_start[0];
-	PWM_SetupDim(0, steps, 0);
-	PWM_StepDim();							// if step = 1 => instant on
+	if (!DisplayDimCnt)						// do not call twice to avoid instand light on
+		{
+		Brightness[0]=Brightness_start[0];
+		PWM_SetupDim(0, steps, 0);
+		PWM_StepDim();						// if step = 1 => instant on
+		}
 	DisplayDimCnt=DisplayDimCntStart;
 }
 
