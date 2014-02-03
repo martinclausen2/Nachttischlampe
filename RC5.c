@@ -1,4 +1,5 @@
-/* Function to decode RC5 commands
+/* Function to decode and code RC5 commands
+   call decoder state machine at 4499 Hz for four times oversampling of the 889µs demodulated RC5 signal pulses
  */
 
 #define IntT0reload 0x04			//T0 extension to clock RC5 receiver

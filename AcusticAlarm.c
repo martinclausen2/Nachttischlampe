@@ -25,6 +25,10 @@
 
 __code unsigned int sound[sizesound][2] = {{65000, 700},{45000, 950},{35000, 750},{25000, 1150},{65000, 0},{65000, 0}};
 
+#define BeepLength 20000
+
+#define BeepFrequency 750
+
 void AcusticDDSAlarm()
 {
 	unsigned int accu=0;
@@ -70,4 +74,44 @@ void AcusticDDSAlarm()
 	P0_6 = PhotoGain.LSB;	//restore gain
 	P0_7 = PhotoGain.MSB;
 	EA=1;
+}
+
+
+void Beep()
+{
+	unsigned int accu=0;
+	unsigned int i;
+
+	typedef union {
+		struct {
+			unsigned ALL:8;  
+		};
+		struct {
+			unsigned LSB:1; 
+			unsigned MSB:1;
+			unsigned free:6;
+		};
+	} AudioGain_t;
+ 
+	AudioGain_t AudioGain;
+
+	AudioGain.ALL=Read_EEPROM(EEAddr_BeepVolume);
+	if (0!=AudioGain.ALL)
+	{
+		-AudioGain.ALL;
+		~AudioGain.ALL;
+		EA=0;
+		_CS_Flash=0;
+		P0_6 = AudioGain.LSB;
+		P0_7 = AudioGain.MSB;
+		for(i=BeepLength; i; i--)
+			{
+			accu+=BeepFrequency;
+			AD1DAT3=sinetable[((accu>>8) & 0xFF)];
+			}
+		_CS_Flash=1;
+		P0_6 = PhotoGain.LSB;	//restore gain
+		P0_7 = PhotoGain.MSB;
+		EA=1;
+	}
 }

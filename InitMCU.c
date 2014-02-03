@@ -42,10 +42,17 @@ void InitMCU()
 	//P1.3 Open-Drain SDA
 	//P1.4 Quasi-Bi Int from ext RTC
 	//P1.5 Input-Only RC5 input
-	//P1.6 Open-Drain OCB PWM for Power-LED Driver Spot
-	//P1.7 Open-Drain OCC PWM for Power-LED Driver Ambiente
+#if HighPWM == 1
+	//P1.6 Push-Pull OCB PWM for Power-LED Driver Spot
+	//P1.7 Push-Pull OCC PWM for Power-LED Driver Ambiente
 	P1M1 = 0b11101100;
 	P1M2 = 0b11001100;
+#else
+	//P1.6 Open-Drain OCB PWM for Power-LED Driver Spot
+	//P1.7 Open-Drain OCC PWM for Power-LED Driver Ambiente
+	P1M1 = 0b00001100;
+	P1M2 = 0b11001100;
+#endif
 	//apply save start-up configuration
 	P1   = 0b00111111;
 
@@ -118,7 +125,7 @@ void InitMCU()
 
 				//Set pins to make CCU output visible
     	P2_6 = 1;
-	P1_6 = 1;    
+	P1_6 = 1;
     	P1_7 = 1;
     	P2_1 = 0;		//stays off for the moment
 
@@ -145,7 +152,7 @@ void InitMCU()
     	TMOD = 0b00000010;	//Init T0 (auto reload timer), T1 (8 bit counter with 1:32 prescaler form 366Hz at 6MHz clk)
     	TCON = 0b01010000;	//gibt T0 & T1 frei
     	TH0 = 256-166;		//T0 high Byte => Reload-Wert
-        		        		//clk source is PCLK=CCLK/2, extended by Software with a 1:4 postscaler
+        		       	//clk source is PCLK=CCLK/2, extended by Software with a 1:4 postscaler, effective frequency 4518Hz
 	//Init Int
 	IP0H = 0b11111011;	//give all except clock on EX1 (IP0X.2) a higher priority, or clock may block encoder
 	IP0 = 0b00000000;

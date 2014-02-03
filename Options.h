@@ -21,9 +21,10 @@
 #define EEAddr_MinimumBackBrightness 11	//Brightness of the backlight during power on, address must follow MinimumFrontBrightness!!!
 #define EEAddr_OffsetFrontBrightness 12	//Brightness Offset of the frontlight
 #define EEAddr_OffsetBackBrightness 13	//Brightness Offset of the backlight
-#define EEAddr_AlarmOffset 14		//Address offset of the alarms
+#define EEAddr_BeepVolume 14		//Volume of the key beep
+#define EEAddr_AlarmOffset 16		//Address offset of the alarms
 
-#define maxOption 17
+#define maxOption 18
 #define maxAlarm 6
 
 #define daysinweek 7
@@ -43,6 +44,8 @@
 #define maxAlarmEndMode 4
 #define maxComMode 3
 
+#define maxBeepVolume 4		// three volume levels plus off, relized in software
+
 #define menutimeout 184630		//timeout = 10s defined by RC5 irq frequency
 
 				//the following three values have to be held consistend manually!
@@ -60,7 +63,7 @@ unsigned char RC5Addr;
 unsigned char ReceiverMode;
 unsigned char SenderMode;
 
-__code unsigned char initEEPROMdata[sizeEEPROM] = {0, 12, 0x40, 16, 0x20, 0x80, 11, 6, 2, 2, 7, 7, 1, 1,
+__code unsigned char initEEPROMdata[sizeEEPROM] = {0, 12, 0x40, 16, 0x20, 0x80, 11, 6, 2, 2, 7, 7, 1, 1, 2 , 0,
 						6, 0, 1, 6, 0, 2, 6, 0, 3, 6, 0, 4, 6, 0, 5, 8, 0, 6, 8, 0, 7};
 
 __code char OptionNames[maxOption+1][15] = {"Set Alarm     ",
@@ -79,8 +82,9 @@ __code char OptionNames[maxOption+1][15] = {"Set Alarm     ",
 				 	 "LCD Backlight ",
 				 	 "LCD Contrast  ",
 				 	 "Set RC Address",
+				 	 "Key Beep Vol  ",
 				 	 "Reset settings",
-				 	 "V4 2013-12-08 "};
+				 	 "V4 2014-02-01 "};
 
 __code char noyestext[2][4] = {" no", "yes"};
 
@@ -88,7 +92,9 @@ __code char SnoozeEndtext[maxAlarmEndMode+1][15] = {"Keep Snooze   ", "End Alarm
 
 __code char ComModetext[maxComMode+1][10] = {"Off      ", "Alarm    ", "Condional", "All      "};
 
-__code char Alarmtext[]   = "Alarm!";
+__code char Alarmtext[] = "Alarm!";
+
+__code char Canceltext[] = "Cancel";
 
 #define ComModeOff	0
 #define ComModeAlarm	1
