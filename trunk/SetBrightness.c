@@ -40,7 +40,8 @@ void Update_PWM_Offset(unsigned char i)
 		}
 }
 
-void PWM_StepDim()				//perform next dimming step, must frquently called for dimming action
+void PWM_StepDim()		// perform next dimming step, must frquently called for dimming action
+				// contains repeated code to optimize performance
 {
 	unsigned int temp;
 	if (PWM_incr_cnt[0])
@@ -49,8 +50,10 @@ void PWM_StepDim()				//perform next dimming step, must frquently called for dim
 		--PWM_incr_cnt[0];
 		if (PWM_set[0])
 			{
+			// add min pulse width => we do not use full 16 bit resolution
+			// & reach PWM = 100% on for Brightness = 0x7F
 			OCRAH =  ((PWM_set[0] >> 6) & 0x00FF);
-			OCRAL = (((PWM_set[0] << 2) & 0x00FC) | 0x0003);	//add min pulse width => we do not use full 16 bit resolution & reach PWM = 100% on for Brightness = 0x7F
+			OCRAL = (((PWM_set[0] << 2) & 0x00FC) | 0x0003);
 			}
 		else
 			{
@@ -65,7 +68,7 @@ void PWM_StepDim()				//perform next dimming step, must frquently called for dim
 		--PWM_incr_cnt[1];
 		if (PWM_set[1])
 			{
-			//with signed int we can not reach 0xFFFF, only 0x3FFF in posssible
+			// with signed int we can not reach 0xFFFF, only 0x3FFF is posssible
 			// including the offset we reach max 0x7FFF, which is just clipped to 0x3FFF
 			temp = (unsigned int)PWM_set[1] + PWM_Offset[1];
 			if (maxRawPWM<temp)
@@ -73,7 +76,7 @@ void PWM_StepDim()				//perform next dimming step, must frquently called for dim
 				temp=maxRawPWM;
 				}
 			OCRBH =  ((temp >> 6) & 0x00FF);
-			OCRBL = (((temp << 2) & 0x00FC) | 0x0003);	//add min pulse width => we do not use full 16 bit resolution & reach PWM = 100% on for Brightness = 0x7F
+			OCRBL = (((temp << 2) & 0x00FC) | 0x0003);
 			}
 		else
 			{
@@ -88,15 +91,13 @@ void PWM_StepDim()				//perform next dimming step, must frquently called for dim
 		--PWM_incr_cnt[2];
 		if (PWM_set[2])
 			{
-			//with signed int we can not reach 0xFFFF, only 0x3FFF in posssible
-			// including the offset we reach max 0x7FFF, which is just clipped to 0x3FFF
 			temp = (unsigned int)PWM_set[2] + PWM_Offset[2];
 			if (maxRawPWM<temp)
 				{
 				temp=maxRawPWM;
 				}
 			OCRCH =  ((temp >> 6) & 0x00FF);
-			OCRCL = (((temp << 2) & 0x00FC) | 0x0003);	//add min pulse width => we do not use full 16 bit resolution & reach PWM = 100% on for Brightness = 0x7F
+			OCRCL = (((temp << 2) & 0x00FC) | 0x0003);
 			}
 		else
 			{
@@ -105,10 +106,8 @@ void PWM_StepDim()				//perform next dimming step, must frquently called for dim
 			}
 		}
 
-
 	// adjust PWM frequency to optain a wider linear range of the PWM
-
-	//find larger PWM value
+	// find larger PWM value
 	if (PWM_set[1]>PWM_set[2])
 		{
 		temp=PWM_set[1];
@@ -122,6 +121,21 @@ void PWM_StepDim()				//perform next dimming step, must frquently called for dim
 	// 6MHz / 2 / 4 * 32 / 1 = 2^16 * 366.2 Hz
 	// TPCR2L CCU prescaler, low byte
 
+#if HighPWM == 1
+	if (temp>800)
+		{
+		TPCR2L=0;	//366Hz
+		}
+	else if (temp>400)
+		{
+		TPCR2L=1;	//183Hz
+		}
+	else
+		{
+		TPCR2L=2;	//122Hz
+		}
+	//at lower rates the ZXLD1374 is not switching on
+#else
 	if (temp>800)
 		{
 		TPCR2L=0;	//366Hz
@@ -146,8 +160,8 @@ void PWM_StepDim()				//perform next dimming step, must frquently called for dim
 		{
 		TPCR2L=5;	//61.0Hz
 		}
-
-	// lowerr rates are flickering to much and lead to aliasing effects with the LCD
+	// lower rates are flickering to much and lead to aliasing effects with the LCD
+#endif
 
 	TCR21 = PLLSetting;	//Set PLL prescaler and start CCU register update
 }
@@ -292,8 +306,8 @@ void SwAllLightOff()
 			{
 			ExtBrightness_last=1;
 			}
-		SenderMode=Read_EEPROM(EEAddr_SenderMode);				//reset mode
-		RefreshTime=1;							//refresh display
+		SenderMode=Read_EEPROM(EEAddr_SenderMode);			//reset mode
+		RefreshTime=1;						//refresh display
 		}
 }
 

@@ -8,7 +8,7 @@
 
 unsigned char Read_EEPROM(unsigned char address)
 {
-	DEECON=0;	//clear EEIF, Byte read / write, first page
+	DEECON=0;		//clear EEIF, Byte read / write, first page
 	DEEADR=address;
 	while( 0 == (DEECON & EEIF) ){}
 	return DEEDAT;
@@ -88,16 +88,16 @@ void AlarmSnoozeEnd()
 		{
 		AlarmEnd();
 		if (2==j || 4==j)
-			{	//send end alarm via RC5, send anyway since use selected to do so
+			{			//send end alarm via RC5, send anyway since use selected to do so
 			SendRC5(RC5Addr_com, RC5Cmd_AlarmEnd, 1, ComModeOff, RC5Cmd_Repeats);
 			}
 		if (4==j)
-			{	//send standby via RC5, send anyway since use selected to do so
+			{			//send standby via RC5, send anyway since use selected to do so
 			CommandPause();		//wait after sending AlarmEnd required
 			SendRC5(RC5Addr_com, RC5Cmd_Off, 1, ComModeOff, RC5Cmd_Repeats);
 			}
 		if (3<=j)
-			{	//goto standby
+			{			//goto standby
 			SwAllLightOff();
 			}
 		if (3>j)
@@ -140,9 +140,9 @@ void Alarm_StepDim(unsigned char i)
 {
 	if (AlarmDim_Cnt[i])
 		{
-		--AlarmDim_Cnt[i];			//count down step
+		--AlarmDim_Cnt[i];				//count down step
 		}
-	else						//dimming step
+	else							//dimming step
 		{
 		if (Brightness[i+1] < Read_EEPROM(EEAddr_AlarmFrontBrightness+i))
 			{
@@ -151,7 +151,7 @@ void Alarm_StepDim(unsigned char i)
 			}
 		else
 			{
-			Alarmflag=0;			//we reached targetbrightness!
+			Alarmflag=0;				//we reached targetbrightness!
 			}
 		}
 }
@@ -184,7 +184,8 @@ void Alarm()
 {
 	if (0==Alarmflag)
 		{
-		SetupAlarmDim(0);		//fade in to required brightness in on or off, no fade in if already brighter, Alarm_StepDim() takes care of this behavior
+		SetupAlarmDim(0);		// fade in to required brightness in on or off,
+					// no fade in if already brighter, Alarm_StepDim() takes care of this behavior
 		SetupAlarmDim(1);
 		LightOn=1;
 		Alarmflag=1;
@@ -238,13 +239,13 @@ unsigned char Find_NextAlarm()		//Checks for the next alarm, returns 0 if no ala
 
 	unsigned char minAlarm=0;		//number of the alarm with the smallest difference
 
-	for(i=0; i<=(skipAlarmCnt>>skipAlarmStepping); i++)
+	for(i=0; i<=(skipAlarmCnt>>skipAlarmStepping); i++)  //ignore compiler warning here
 		{
 		maxskipAlarmCnt=0;
-		for(j=0; j<maxAlarm+1; j++)	//go through all alarms
+		for(j=0; j<maxAlarm+1; j++)		//go through all alarms
 			{
 			ReadAlarmEEPROM(j, &curAlarm[0]);
-			if (curAlarm[2])	//is this alarm on at all?
+			if (curAlarm[2])			//is this alarm on at all?
 				{
 				//calculate time difference between now and alarm
 				if (alldays==curAlarm[2])
@@ -262,7 +263,7 @@ unsigned char Find_NextAlarm()		//Checks for the next alarm, returns 0 if no ala
 					curdifference+=daysinweek*24*60;
 					}
 				maxskipAlarmCnt++;
-	
+
 				// set alarm no if alarm is closer or no alarm is set yet
 				if (((mindifference>curdifference) || 0==mindifference) && curmindifference<curdifference)
 					{
@@ -334,10 +335,17 @@ void SelectAlarm()
 	LCD_SelectAlarm(AlarmNo);
 	while(stay)
 		{
-		// Select key is pressed
-		if (TimerFlag && KeySelect == KeyState && KeyPressShort == KeyPressDuration)
+		// Select key is pressed, show preview of action
+		if (TimerFlag && KeySelect == KeyState)
 			{
-			LCD_SendStringFill2ndLine("Exit Alarms");
+			if (KeyPressShort == KeyPressDuration)
+				{
+				LCD_SendStringFill2ndLine("Exit Alarms");
+				}
+			else if (KeyPressLong == KeyPressDuration)
+				{
+				LCD_SendStringFill2ndLine(&Canceltext[0]);
+				}
 			TimerFlag=0;
 			}
 
@@ -345,19 +353,23 @@ void SelectAlarm()
 		// OldKeyState = 0 must be set by receiving program after decoding as a flag
 		else if ((KeySelect == OldKeyState) && (0 == KeyState))
 			{
-			OldKeyState=0;
 			if (KeyPressShort > KeyPressDuration)
 				{
-				OldKeyState=0;
 				SetupAlarm(AlarmNo);
 				LCD_ClearDisplay();
 				LCD_SendString(&OptionNames[0][0]);
 				LCD_SelectAlarm(AlarmNo);
 				}
-			else
+			else if (KeyPressLong > KeyPressDuration)
 				{
 				stay=0;
 				}
+			else
+				{
+				LCD_SelectAlarm(AlarmNo);
+				}
+			OldKeyState=0;
+			EncoderSteps=0;
 			}
 		if (EncoderSetupValue(&AlarmNo, maxAlarm, 0))
 			{
@@ -530,6 +542,30 @@ void SetupRCAddress()
 	EncoderSteps = 0;				//reset steps
 }
 
+void LCD_SetupBeepVolume(unsigned char Volume)
+{
+	LCD_SendCmd(LCDSet2ndLine);
+	printf_fast("Volume %2d  ", Volume);
+}
+
+//change RC5 address by receiving a now one and store it after a key being pressed in the EEPROM
+void SetupBeepVolume()
+{
+	unsigned char Volume;
+	Volume = Read_EEPROM(EEAddr_BeepVolume);
+	LCD_SetupBeepVolume(Volume);
+	while(CheckKeyPressed())
+		{
+		if (EncoderSetupValue(&Volume, maxBeepVolume,0))
+			{
+			LCD_SetupBeepVolume(Volume);
+			}
+		PCON=MCUIdle;			//go idel, wake up by any int
+		}
+	Write_EEPROM(EEAddr_BeepVolume, Volume);	//Update EEPROM
+	EncoderSteps = 0;				//reset steps
+}
+
 void LCD_InitEEPROMYN(unsigned char j)
 {
 	LCD_SendString2ndLine("Reset? ");
@@ -610,11 +646,18 @@ void Options()
 
 	while(stay)
 		{
-		// Select key is pressed
-		if (TimerFlag && KeySelect == KeyState && KeyPressShort == KeyPressDuration)
+		// Select key is pressed, show preview of action
+		if (TimerFlag && KeySelect == KeyState)
 			{
-			LCD_SendStringFill2ndLine("Exit Options");
-			TimerFlag = 0;
+			if (KeyPressShort == KeyPressDuration)
+				{
+				LCD_SendStringFill2ndLine("Exit Options");
+				}
+			else if (KeyPressLong == KeyPressDuration)
+				{
+				LCD_SendStringFill2ndLine(&Canceltext[0]);
+				}
+			TimerFlag = 0;		//acknowledge key pressing
 			}
 
 		// A Key was pressed if OldKeyState != 0 and Keystate = 0
@@ -623,8 +666,7 @@ void Options()
 			{
 			if (KeyPressShort > KeyPressDuration)
 				{
-				OldKeyState = 0;
-				EncoderSteps = 0;				//reset steps
+				OldKeyState=0;				//acknowldge key pressing
 				LCD_ClearDisplay();			//prepare display for submenu
 				LCD_SendString(&OptionNames[Option][0]);	// display option name in first line
 				switch (Option)
@@ -684,23 +726,35 @@ void Options()
 						SetupRCAddress();
 						break;
 					case 16:
+						SetupBeepVolume();
+						break;
+					case 17:
 						InitEEPROM();
 						break;
 					}
-				LCD_Option(Option);		//Refresh display after setup function
+				LCD_Option(Option);	//Refresh display after setup function
+				}
+			else if (KeyPressLong > KeyPressDuration)
+				{
+				stay=0;
 				}
 			else
 				{
-				OldKeyState=0;
-				stay=0;
+				LCD_CurrentOption(Option);	//Cancel key pressing, refresh display
 				}
+			OldKeyState=0;			//acknowldge key pressing
+			EncoderSteps = 0;			//reset steps
 			}
 		if (EncoderSetupValue(&Option, maxOption, 0))
 			{
 			LCD_CurrentOption(Option);
 			}
-		PCON=MCUIdle;			//go idel, wake up by any int
+		PCON=MCUIdle;				//go idel, wake up by any int
 		}
 	LCD_ClearDisplay();
 	RefreshTime=1;
+	if (LightOn)
+		{
+		LCD_SendBrightness(FocusBacklight+1);
+		}
 }

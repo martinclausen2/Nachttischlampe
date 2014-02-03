@@ -3,15 +3,20 @@
  * @file Main.c
  * use a P89LPC936 with 6Mhz resonator
  * Compiler options: -mmcs51 --iram-size 256 --xram-size 512 --code-size 16368 --std-sdcc89 --model-medium, all optimastions on
- * SDCC 3.2.0
+ * SDCC 3.3.0
  */
 
 // This file defines registers available in P89LPC93X
 #include <p89lpc935_6.h>
 #include <stdio.h>
 
+			// set to 1 for ZXLD1374 since the chip will not switch on at PWM frequencies lower than 100Hz (SetBrightness.C)
+			// this will also activate push-pull outputs (InitMCU.C)
+#define HighPWM	0	// set to 0 for ZXLD1362 to obtain a wider dimming range at the cost of a lower PWM frequency / flickering
+
 #define KeyPressShort	20
 #define KeyPressLong	60
+#define KeyPressLonger	KeyPressLong*2
 
 #define isrregisterbank	2		//for all isr on the SAME priority level 
 
@@ -44,7 +49,6 @@ __bit FocusBacklight;
 #include "Options.c"
 #include "AcusticAlarm.c"
 
-
 /** Main loop */
 void main()
 {
@@ -68,7 +72,6 @@ void main()
 
 	// Infinite loop
 	while(1) {
-
 		if (TimerFlag)
 			{
 			PWM_StepDim();			// do next dimming step
@@ -81,7 +84,8 @@ void main()
 				{
 				SwLightOff(0);
 				DisplayDimCnt=0;
-				skipAlarmCnt = (skipAlarmCnt & skipAlarmMask) | skipAlarmhalfStep;	//set lsb, so we can use the encode to switch on again without changing alarm settings
+				//set lsb, so we can use the encode to switch on again without changing alarm settings
+				skipAlarmCnt = (skipAlarmCnt & skipAlarmMask) | skipAlarmhalfStep;
 				}
 			else				// do not measure intensity with backlight on
 				{
@@ -90,30 +94,42 @@ void main()
 			TimerFlag=0;
 
 			// check keys here since we can have only new input if timerflag was set by the keys interrupt program
-
-			// Select key is pressed
+			// Select key is pressed, show preview of action
 			if (KeySelect == KeyState)
 				{
-				SwBackLightOn(fadetime);			//switch on or stay on
+				SwBackLightOn(fadetime);	//switch on or stay on
 				if (Minutes2Signal)
 					{
 					if(0 == KeyPressDuration)
 						{
 						LCD_SendStringFill2ndLine("Set Snooze End");
 						}
+					else if (KeyPressLong == KeyPressDuration)
+						{
+						LCD_SendStringFill2ndLine("End Alarm");
+						Beep();
+						}
 					}
 				else if (KeyPressShort == KeyPressDuration)
 					if (LightOn)
 						{
 						LCD_SendStringFill2ndLine("Enter Standby");
+						Beep();
 						}
 					else
 						{
 						LCD_SendStringFill2ndLine("Switch All On");
+						Beep();
 						}
 				else if (KeyPressLong == KeyPressDuration)
 					{
 					LCD_SendStringFill2ndLine("Enter Options");
+					Beep();
+					}
+				else if (KeyPressLonger == KeyPressDuration)
+					{
+					LCD_SendStringFill2ndLine(&Canceltext[0]);
+					Beep();
 					}
 				}
 
@@ -121,10 +137,18 @@ void main()
 			// OldKeyState = 0 must be set by receiving program after decoding as a flag
 			else if ((KeySelect == OldKeyState) && (0 == KeyState))
 				{
-				OldKeyState=0;				//Ack any key anyway
+				OldKeyState=0;		//Ack any key anyway
 				if (Minutes2Signal)
 					{
-					AlarmSnoozeEnd();
+					if (KeyPressLong > KeyPressDuration)
+						{
+						AlarmSnoozeEnd();
+						}
+					else
+						{
+						AlarmEnd();
+						LCD_SendBrightness(FocusBacklight+1);
+						}
 					}
 				else if (KeyPressShort > KeyPressDuration)
 					{
@@ -148,7 +172,7 @@ void main()
 						}
 					else
 						{
-						if (ComModeConditional<=SenderMode)			//reset to eeprom value in swalllightoff()
+						if (ComModeConditional<=SenderMode)		//reset to eeprom value in swalllightoff()
 							{
 							SenderMode=ComModeAll;
 							}
@@ -156,14 +180,18 @@ void main()
 						SwAllLightOn();
 						}
 					}
-				else
+				else if (KeyPressLonger > KeyPressDuration)
 					{
 					Alarmflag=0;
 					Options();
-					if (LightOn)
+					}
+				else
+					{
+					if (LightOn)	// Cancel key pressing, refresh display
 						{
 						LCD_SendBrightness(FocusBacklight+1);
 						}
+					RefreshTime=1;
 					}
 				}
 			}
@@ -172,7 +200,7 @@ void main()
 			{
 			GetTimeDateRTC();
 			LCD_SendTime();
-			if (RefreshTimeRTC)			//execute only once(!) every minute or we can not leave the alarm during its first minute, 
+			if (RefreshTimeRTC)		//execute only once(!) every minute or we can not leave the alarm during its first minute
 				{
 				CheckAlarm();
 				}
@@ -190,7 +218,7 @@ void main()
 				}
 			else if (1 == Minutes2Signal)
 				{
-				SwBackLightOn(1);			//switch on now
+				SwBackLightOn(1);					//switch on now
 				LCD_SendStringFill2ndLine(&Alarmtext[0]);
 				AcusticDDSAlarm();
 				Minutes2Signal=Read_EEPROM(EEAddr_AlarmTimeSnooze);	//start snooze
