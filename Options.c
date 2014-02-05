@@ -355,6 +355,7 @@ void SelectAlarm()
 			{
 			if (KeyPressShort > KeyPressDuration)
 				{
+				OldKeyState=0;		//acknowldge key pressing
 				SetupAlarm(AlarmNo);
 				LCD_ClearDisplay();
 				LCD_SendString(&OptionNames[0][0]);
