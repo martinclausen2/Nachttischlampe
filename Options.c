@@ -560,6 +560,7 @@ void SetupBeepVolume()
 		if (EncoderSetupValue(&Volume, maxBeepVolume,0))
 			{
 			LCD_SetupBeepVolume(Volume);
+			BeepVol(Volume);
 			}
 		PCON=MCUIdle;			//go idel, wake up by any int
 		}

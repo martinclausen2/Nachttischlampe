@@ -12,7 +12,7 @@
 
 			// set to 1 for ZXLD1374 since the chip will not switch on at PWM frequencies lower than 100Hz (SetBrightness.C)
 			// this will also activate push-pull outputs (InitMCU.C)
-#define HighPWM	0	// set to 0 for ZXLD1362 to obtain a wider dimming range at the cost of a lower PWM frequency / flickering
+#define HighPWM	1	// set to 0 for ZXLD1362 to obtain a wider dimming range at the cost of a lower PWM frequency / flickering
 
 #define KeyPressShort	20
 #define KeyPressLong	60
@@ -46,8 +46,8 @@ __bit FocusBacklight;
 #include "SetBrightness.c"
 #include "I2C_RTC.c"
 #include "RC5.c"
-#include "Options.c"
 #include "AcusticAlarm.c"
+#include "Options.c"
 
 /** Main loop */
 void main()
