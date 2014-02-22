@@ -84,7 +84,7 @@ __code char OptionNames[maxOption+1][15] = {"Set Alarm     ",
 				 	 "Set RC Address",
 				 	 "Key Beep Vol  ",
 				 	 "Reset settings",
-				 	 "V4 2014-02-01 "};
+				 	 "V4 2014-02-22 "};
 
 __code char noyestext[2][4] = {" no", "yes"};
 

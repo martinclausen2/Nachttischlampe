@@ -45,12 +45,12 @@ void InitMCU()
 #if HighPWM == 1
 	//P1.6 Push-Pull OCB PWM for Power-LED Driver Spot
 	//P1.7 Push-Pull OCC PWM for Power-LED Driver Ambiente
-	P1M1 = 0b11101100;
+	P1M1 = 0b00101100;
 	P1M2 = 0b11001100;
 #else
 	//P1.6 Open-Drain OCB PWM for Power-LED Driver Spot
 	//P1.7 Open-Drain OCC PWM for Power-LED Driver Ambiente
-	P1M1 = 0b00001100;
+	P1M1 = 0b11001100;
 	P1M2 = 0b11001100;
 #endif
 	//apply save start-up configuration
