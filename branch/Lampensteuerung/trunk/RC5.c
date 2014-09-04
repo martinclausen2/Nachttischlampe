@@ -1,12 +1,10 @@
-/* Function to decode and code RC5 commands
+/* Function to decode and code RC5 commands for LampenSteuerung
    call decoder state machine at 4499 Hz for four times oversampling of the 889µs demodulated RC5 signal pulses
  */
 
 #define IntT0reload 0x04			//T0 extension to clock RC5 receiver
 
-#define _RC5inp		P1_5		//define RC5 input pin
-#define _CS_Flash		P0_5		//define /CS for serial FLASh and /Shuntown for audio amp
-#define RC5output		P2.1		//define RC5 output pin, assembler style required
+#define _RC5inp		P1_4		//define RC5 input pin
 
 #define RC5Addr_front	27		//address for frontlight brightness
 #define RC5Addr_back	28		//address for backligth brightness, MUST follow front address!
@@ -92,165 +90,20 @@ void T0_isr(void) __interrupt(1)	__using(isrregisterbank)	//int from Timer 0 to 
 		}
 }
 
-
-// RC5 Sender
-
-
-//send IR Pulse as defined for RC5 with 36KHz modulation
-#define IRPulse \
-	__asm \
-   	setb RC5output \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-	nop \
-   	nop \
-	nop \
-	clr RC5output \
-	__endasm;
-
-//send zero
-void SendBit0()
-{
-	unsigned char i;
- 	for(i=0; i<32; i++)
-	  	{
-		IRPulse
-		Wait2us(7);
-	  	}
-	//890us Pause
-  	Wait100us(8);
-  	Wait2us(43);
-}
-
-//Send one
-void SendBit1()
-{
-	unsigned char i;
-	//890us Pause
-	Wait100us(8);
-  	Wait2us(43);
-
- 	//890us Impuls mit 36kHz senden
- 	for(i=0; i<32; i++)
-  		{
-		IRPulse
-		Wait2us(7);
-  		}
-
-}
-
-//Sends RC5 code, disables all irs to keep the timing 
-//timing for 8051 two clock core at 6MHz
-void SendCommand(unsigned char address, unsigned char code, unsigned char toggle)
-{
-	unsigned char mask;
-	unsigned char i;
-
- 	EA=0;		//all irq off
-	SendBit1();	//1st Startbit=1
-	SendBit1();	//2nd Startbit=1
-
-	//Togglebit
-	if(toggle==0)
-		{
-		SendBit0();
-    		}
-   	else
-    		{
-     		SendBit1();
-    		}
-
-	//5 Bit Address
-   	mask=0x10;	//Begin with MSB
-   	for(i=0; i<5; i++)
-    		{
-		if(address&mask)
-      			{
-       			SendBit1();
-      			}
-     		else
-      			{
-       			SendBit0();
-      			}
-		mask>>=1;	//Next bit
-    		}
-
-	//6 Bit Code
-   	mask=0x20;
-	for(i=0; i<6; i++)
-		{
-		if(code&mask)
-			{
-       			SendBit1();
-      			}
-     		else
-     	 		{
-       			SendBit0();
-      			}
-     		mask>>=1; 
-		}
-	//switch off IR-LED anyway
-	__asm
-   		clr RC5output
-   	__endasm;
-   	EA=1;		//all irq on again
-}
-
-
-void CommandPause()
-{
-	// use all interupt sources to create delay of 89ms
-	unsigned int j;
-	for(j=1641; j; j--)
-		{
-		PCON=0b00000001;				//go idel, wake up by any int
-		}
-}
-
-//Sends RC5 code if required, including repeats
-void SendRC5(unsigned char address, unsigned char code, unsigned char toggle, unsigned char requiredmode, unsigned repeats)
-{
-	unsigned char j;
-	if (SenderMode>=requiredmode)
-		{
-		for(j=1; j<=repeats; j++)
-			{
-			SendCommand(address, code, toggle);
-			if (j<repeats)			//skip last pause in sequence of repeated commands
-				{
-				CommandPause();		//wait 88.9ms
-				}
-		   	}
-	   	}
-}
-
 //setup brightness values
-void SetLightRemote(unsigned char i, signed char steps)
+void SetLightRemote(signed char steps)
 {
-	PWM_SetupDim(i+1, Brightness_steps, steps);
-	LCD_SendBrightness(i+1);
-	FocusBacklight=i;
-	LightOn=1;
+	PWM_SetupDim(Brightness_steps, steps);
+	SendBrightness();
+	WriteTimer=WriteTime;
 }
 
-void SetBrightnessRemote(unsigned char i)
+void SetBrightnessRemote()
 {
 	if (ReceiverMode>=ComModeConditional)
 		{
-		Brightness[i+1]=((rCommand<<1) & 0x7E) + RTbit;
-		SetLightRemote(i,0);
+		Brightness=((rCommand<<1) & 0x7E) + RTbit;
+		SetLightRemote(0);
 		}
 }
 
@@ -267,10 +120,10 @@ void DecodeRemote()
 				{
 				case 1:
 				case 12:			//Standby
-					SwAllLightOn();
+					SwLightOn();
 					break;
 				case 13:			//mute
-					SwAllLightOff();
+					SwLightOff();
 					break;
   				}
 			}
@@ -278,27 +131,25 @@ void DecodeRemote()
   		switch (rCommand)			//new or same key pressed
   			{
   			case 16:				//incr vol
-				SetLightRemote(0, RemoteSteps);
+				SetLightRemote(RemoteSteps);
 				break;
   			case 17:				//decr vol
-				SetLightRemote(0, -RemoteSteps);
+				SetLightRemote(-RemoteSteps);
 				break;
 			case 32:				//incr channel
-				SetLightRemote(1, RemoteSteps);
+				SwLightOnMax();
+				WriteTimer=WriteTime;
 				break;
 			case 33:				//decr channel
-				SetLightRemote(1, -RemoteSteps);
+				SwLightOnMin();
+				WriteTimer=WriteTime;
 				break;
   			}
   		RTbitold=RTbit;				//Togglebit speichern
   		}
   	else if (RC5Addr_front==rAddress)
   		{
-  		SetBrightnessRemote(0);
-  		}
-  	else if (RC5Addr_back==rAddress)
-  		{
-  		SetBrightnessRemote(1);
+  		SetBrightnessRemote();
   		}
   	else if (RC5Addr_com==rAddress)
   		{
@@ -313,20 +164,19 @@ void DecodeRemote()
   			case RC5Cmd_AlarmEnd:
   				if (ComModeAlarm<=ReceiverMode)
   					{
-  					AlarmEnd();
-					LCD_SendBrightness(FocusBacklight+1);
+					LCD_SendBrightness();
   					}
   				break;
   			case RC5Cmd_Off:
 				if (ComModeConditional<=ReceiverMode)
 					{
-					SwAllLightOff();
+					SwLightOff();
 					}
   				break;
   			case RC5Cmd_On:
 				if (ComModeConditional<=ReceiverMode)
 					{
-					SwAllLightOn();
+					SwLightOn();
 					}
   				break;
   			}

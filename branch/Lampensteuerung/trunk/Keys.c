@@ -3,10 +3,9 @@
  */
 
 // Encoder and Keys should not overlap in their bits
-#define KeysPort		P0		//select port with keys
-#define SelKeys		0b00001100	//select keys within key port
-#define KeyEscape		0b00000100
-#define KeySelect		0b00001000
+#define KeysPort		P1		//select port with keys
+#define SelKeys		0b00100000	//select keys within key port
+#define KeySelect		0b00100000
 
 volatile unsigned char KeyState;		//stores the keys state
 volatile unsigned char OldKeyState;

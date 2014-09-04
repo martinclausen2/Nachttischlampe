@@ -21,7 +21,7 @@
 #include <p89lpc935_6.h>
 
 // Encoder and Keys should not overlap in their bits
-#define EncoderPort	P0		//select port with encoder
+#define EncoderPort	P1		//select port with encoder
 #define SelEncoder 	0b00000011	//select Encoder bits, must be two lower bits
 #define SelEncoderState	0b00011100	//select Enocder state bits
 #define KeyIncr		0b00000001

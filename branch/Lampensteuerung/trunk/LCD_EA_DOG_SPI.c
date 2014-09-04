@@ -91,6 +91,12 @@ void LCD_SendString(__code unsigned char *var)
      		}
 }
 
+void LCD_SendString1stLine(__code unsigned char *var)
+{
+	LCD_SendCmd(LCDSet1stLine);
+	LCD_SendString(&*var);
+}
+
 void LCD_SendString2ndLine(__code unsigned char *var)
 {
 	LCD_SendCmd(LCDSet2ndLine);
