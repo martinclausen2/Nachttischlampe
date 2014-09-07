@@ -6,25 +6,6 @@
 #include <p89lpc935_6.h>
 #include "Options.h"
 
-unsigned char Read_EEPROM(unsigned char address)
-{
-	DEECON=0;		//clear EEIF, Byte read / write, first page
-	DEEADR=address;
-	while( 0 == (DEECON & EEIF) ){}
-	return DEEDAT;
-}
-
-void Write_EEPROM(unsigned char address, unsigned char data2write)
-{
-	if (Read_EEPROM(address)!=data2write)	//write only if content has changed!
-		{
-		DEECON=0;	//clear EEIF, Byte read / write, first page
-		DEEDAT=data2write;
-		DEEADR=address;
-		while( 0 == (DEECON & EEIF) ){}
-		}
-}
-
 //wake-up light dimming
 void Alarm_StepDim()
 {
@@ -75,25 +56,35 @@ void AlarmEnd()
 
 void LCD_MinuteOff(unsigned char Value, unsigned char maxValue)
 {
+	#ifdef LCD
 	LCD_SendCmd(LCDSet2ndLine);
+	#endif
 	if (0==Value)			//this value should not be used!
 		{
+		#ifdef LCD
 		printf_fast("off       ");
+		#endif
 		LEDOff();
 		}
 	else if (1==Value)
 		{
+		#ifdef LCD
 		printf_fast("instantly ");
+		#endif
 		LEDOption(0);
 		}
 	else if (2==Value)
 		{
+		#ifdef LCD
 		printf_fast(" 1 Minute ");
+		#endif
 		LEDOption(1);
 		}
 	else 
 		{
+		#ifdef LCD
 		printf_fast("%2d Minutes", Value-1);
+		#endif
 		if (Value < (maxValue>>2 & 0x3F))
 			{
 			LEDOption(1);
@@ -132,7 +123,7 @@ void SetupBrightness(unsigned char EEPROM_Addr)
 	signed char tempBrightness;
 	tempBrightness=Brightness;		//store current brightness
 	Brightness = Read_EEPROM(EEPROM_Addr);
-	PWM_SetupNow( 0);			//setup brightness
+	PWM_SetupNow(0);			//setup brightness
 	LCD_SendBrightness();
 	while(CheckKeyPressed())
 		{
@@ -151,6 +142,33 @@ void SetupBrightness(unsigned char EEPROM_Addr)
 	PWM_SetupNow(0);
 }
 
+void LCD_ExtBrightness(unsigned char value)
+{
+	#ifdef LCD
+	LCD_SendCmd(LCDSet2ndLine);
+	printf_fast("Meas %3d,Set %3d", GetMotionDetectorExtBrightnessValue(), value);
+	#endif
+	LEDOption(value >> 6 & 0x03);
+}
+
+//change contrast setting of LCD and store in EEPROM
+void SetupExtBrightness()
+{
+	unsigned char value;
+	value = Read_EEPROM(EEAddr_DetectorBrightness);
+	LCD_ExtBrightness(value);
+	while(CheckKeyPressed())
+		{
+		if (EncoderSetupValue(&value, maxDetectorBrightness, minDetectorBrightness))
+			{
+			LCD_ExtBrightness(value);
+			}
+		PCON=MCUIdle;			//go idel, wake up by any int
+		}
+	Write_EEPROM(EEAddr_DetectorBrightness, value);
+}
+
+#ifdef LCD
 void LCD_Contrast(unsigned char Contrast)
 {
 	LCD_SendCmd(LCDSet2ndLine);
@@ -175,11 +193,14 @@ void SetupContrast()
 		}
 	Write_EEPROM(EEAddr_LCDContrast, Contrast);
 }
+#endif
 
 void LCD_SetupRCAddress(unsigned char Address)
 {
+	#ifdef LCD
 	LCD_SendCmd(LCDSet2ndLine);
 	printf_fast("Addr %2d         ", Address);
+	#endif
 	LEDOption(0);
 }
 
@@ -196,8 +217,10 @@ void SetupRCAddress()
 			if((RC5Addr_front!=rAddress) && (RC5Addr_back!=rAddress) && (RC5Addr_com!=rAddress))	//do not use inter lamp com channels
 				{
 				Address=rAddress;
+				#ifdef LCD
 				LCD_SendCmd(LCDSet2ndLine);
 				printf_fast("Addr %2d Cmd %2d %1d", Address, rCommand, RTbit);
+				#endif
 				LEDOption(1);
 				rCounter=0;		//Nach Erkennung zurücksetzen
 				}
@@ -216,8 +239,10 @@ void SetupRCAddress()
 
 void LCD_InitEEPROMYN(unsigned char j)
 {
+	#ifdef LCD
 	LCD_SendString2ndLine("Reset? ");
 	LCD_SendString(&noyestext[j][0]);
+	#endif
 	LEDOption(j);
 }
 
@@ -241,14 +266,18 @@ void InitEEPROM()					//reset EEPROM to default
 			Write_EEPROM(j, initEEPROMdata[j]);
 			}
 		//update values
+		#ifdef LCD
 		LCD_SetContrast(Read_EEPROM(EEAddr_LCDContrast));
+		#endif
 		PWM_SetupNow(0);
 		}
 }
 
 void LCD_ComMode(unsigned char j)
 {
+	#ifdef LCD
 	LCD_SendString2ndLine(&ComModetext[j][0]);
+	#endif
 	LEDOption(j);
 }
 
@@ -272,14 +301,18 @@ void SetupComMode(unsigned char EEPROM_Address)
 //Display the current Option
 void LCD_CurrentOption(unsigned char Option)
 {
+	#ifdef LCD
 	LCD_SendString2ndLine(&OptionNames[Option][0]);
+	#endif
 	LEDOptionsFlash(Option);
 }
 
 void LCD_Option(unsigned char Option)
 {
+	#ifdef LCD
 	LCD_ClearDisplay();
 	LCD_SendString("Options");
+	#endif
 	LCD_CurrentOption(Option);
 }
 
@@ -305,7 +338,9 @@ void Options()
 				if (KeyPressShort == KeyPressDuration)
 					{
 					LEDFlashReset();
+					#ifdef LCD
 					LCD_SendStringFill2ndLine("Exit Options");
+					#endif
 					if (LightOn)
 						{
 						LEDOn();
@@ -317,7 +352,9 @@ void Options()
 					}
 				else if (KeyPressLong == KeyPressDuration)
 					{
+					#ifdef LCD
 					LCD_SendStringFill2ndLine(&Canceltext[0]);
+					#endif
 					LEDCancel();
 					}
 				}
@@ -331,8 +368,10 @@ void Options()
 			if (KeyPressShort > KeyPressDuration)
 				{
 				OldKeyState=0;				//acknowldge key pressing
+				#ifdef LCD
 				LCD_ClearDisplay();			//prepare display for submenu
 				LCD_SendString(&OptionNames[Option][0]);	// display option name in first line
+				#endif
 				LEDFlashReset();				//prepare LED
 				switch (Option)
 					{
@@ -351,18 +390,26 @@ void Options()
 						SetupMinutes(EEAddr_LightFading, minLightFading, maxLightFading);
 						break;
 					case 4:
-						SetupRCAddress();
+						SetupMinutes(EEAddr_DetectorTimeout, minDetectorTimeout, maxDetectorTimeout);
 						break;
 					case 5:
+						SetupExtBrightness();
+						break;
+					case 6:
+						SetupRCAddress();
+						break;
+					case 7:
 						SetupComMode(EEAddr_ReceiverMode);
 						ReceiverMode=Read_EEPROM(EEAddr_ReceiverMode);
 						break;
-					case 6:
+					case 8:
 						InitEEPROM();
 						break;
-					case 7:
+					#ifdef LCD						
+					case 9:
 						SetupContrast();
 						break;
+					#endif
 					}
 				LCD_Option(Option);	//Refresh display after setup function
 				}
@@ -383,6 +430,8 @@ void Options()
 			}
 		PCON=MCUIdle;				//go idel, wake up by any int
 		}
+	#ifdef LCD
 	LCD_ClearDisplay();
+	#endif
 	LEDFlashReset();
 }

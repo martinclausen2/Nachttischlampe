@@ -114,6 +114,7 @@ void DecodeRemote()
 
 	if (RC5Addr==rAddress)
 		{
+		MotionDetectorTimer=0;	//reset any Motion Detector activity
 		if (RTbit ^ RTbitold)			//Neue Taste erkannt
 			{
 			switch (rCommand)
@@ -149,10 +150,12 @@ void DecodeRemote()
   		}
   	else if (RC5Addr_front==rAddress)
   		{
+		MotionDetectorTimer=0;	//reset any Motion Detector activity
   		SetBrightnessRemote();
   		}
   	else if (RC5Addr_com==rAddress)
   		{
+		MotionDetectorTimer=0;	//reset any Motion Detector activity
   		switch (rCommand)
   			{
   			case RC5Cmd_AlarmStart:

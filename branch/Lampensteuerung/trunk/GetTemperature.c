@@ -60,3 +60,20 @@ unsigned char GetTemperature()
 	value += TempOffset;				//offset in °C
 	return (value & 0xFF);
 }
+
+#ifdef LCD
+void LCD_Temperature()
+{
+	unsigned static char Timer = maxDisplayTimer;	//Software timer to decouple display frequency from calling frequency
+	if (Timer)
+		{
+		--Timer;
+		}
+	else
+		{
+		Timer = maxDisplayTimer;
+		LCD_ReturnHome();
+		printf("Temp: %3d\xDF C", GetTemperature());
+		}
+}
+#endif

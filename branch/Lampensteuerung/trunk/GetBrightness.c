@@ -23,13 +23,11 @@ unsigned long ExtBrightness;		//will be filled up to 24 bit with 64 datapoint mo
 /**amplification factors of photoamp */
 __code unsigned char PhotoGainTable[3] = {0b01100000, 0b10100000, 0b11000000};	//low "active", use only 3 upper MSB
 __code unsigned int photoampfactor[3] = {1, 33, 1000};
-	unsigned char static PhotoGain;
-	unsigned char ADC_Result;
 
 void MeasureExtBrightness()
 {
-//	unsigned char static PhotoGain;
-//	unsigned char ADC_Result;
+	unsigned char static PhotoGain;
+	unsigned char ADC_Result;
 	ADCON1 = 0b00000101; 			//Enable ADC&DAC 1 immediate start
 						//in the meantime: remove a 1/64 so we have a moving average over 64 datapoints
 	ExtBrightness -= (ExtBrightness >> BrightexpPointsToAvg) & 0x03FFFF;

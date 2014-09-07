@@ -2,6 +2,7 @@
  * Main Program of LampenSteuerung, a program to control a LED power supply by PWM or analogue signal
  * @file Main.c
  * use a P89LPC936 with internal 7.373 MHz RC oszilator
+ * use a P89LPC935 or 936 with internal 7.373 MHz RC oszilator for the version without a LCD
  * Compiler options: -mmcs51 --iram-size 256 --xram-size 512 --code-size 16368 --std-sdcc89 --model-medium, all optimastions on
  * SDCC 3.3.0
  */
@@ -10,7 +11,7 @@
 #include <p89lpc935_6.h>
 #include <stdio.h>
 
-#define updateRate	25		//bei 40ms Takt => 1Hz
+#define LCD
 
 #define KeyPressShort	20
 #define KeyPressLong	60
@@ -27,17 +28,23 @@ __bit Alarmflag;
 __bit LightOn;
 
 #include "Options.h"
+#ifdef LCD
 #include "LCD_EA_DOG_SPI.h"
+#endif
 #include "StatusLED.h"
 #include "GetTemperature.h"
 
+#include "EEPROM.c"
 #include "InitMCU.c"
+#ifdef LCD
 #include "LCD_EA_DOG_SPI.c"
+#endif
 #include "Encoder.c"
 #include "Keys.c"
 #include "GetBrightness.c"
 #include "SetBrightness.c"
 #include "GetTemperature.c"
+#include "MotionDetector.c"
 #include "RC5.c"
 #include "Options.c"
 #include "StatusLED.c"
@@ -47,9 +54,11 @@ void main()
 {
 	InitMCU();
 
+	#ifdef LCD
 	LCD_Init3V();
 	LCD_SetContrast(Read_EEPROM(EEAddr_LCDContrast));
 	LCD_SendString2ndLine("LCD ok");
+	#endif
 
 	//load RAM values from EEPROM
 	ReceiverMode=Read_EEPROM(EEAddr_ReceiverMode);
@@ -64,7 +73,7 @@ void main()
 		if (TimerFlag)
 			{
 			TimerFlag=0;
-			MeasureTemperature();		// always measure temp or we can not exit overtemp anymore
+			MeasureTemperature();	// always measure temp or we can not exit overtemp anymore
 			PWM_StepDim();		// do next dimming step
 			switch (LimitOutput())	// decide if temperature is ok and what to do about it, LimitOutput will act on PWM values
 				{
@@ -78,7 +87,9 @@ void main()
 					if (LightOn)
 						{
 						SwLightOff();
+						#ifdef LCD
 						LCD_SendStringFill2ndLine("Temperature!");
+						#endif
 						}
 					break;
 				default: //normal operation
@@ -86,7 +97,10 @@ void main()
 					break;
 				}
 			PWM_Set();
-
+			#ifdef LCD
+			LCD_Temperature();
+			#endif
+			MotionDetector();
 
 			if (LightOn)
 				{
@@ -109,12 +123,16 @@ void main()
 				{
 				if (KeyPressShort == KeyPressDuration)
 					{
+					#ifdef LCD
 					LCD_SendStringFill2ndLine("Enter Options");
+					#endif
 					LEDOptions();
 					}
 				else if (KeyPressLong == KeyPressDuration)
 					{
+					#ifdef LCD
 					LCD_SendStringFill2ndLine(&Canceltext[0]);
+					#endif
 					LEDCancel();
 					}
 				}
@@ -124,6 +142,7 @@ void main()
 			else if ((KeySelect == OldKeyState) && (0 == KeyState))
 				{
 				OldKeyState=0;		//Ack any key anyway
+				MotionDetectorTimer=0;	//reset any Motion Detector activity
 				if (KeyPressShort > KeyPressDuration)
 					{
 					if (LightOn)
@@ -149,7 +168,9 @@ void main()
 						}
 					else
 						{
+						#ifdef LCD
 						LCD_SendStringFill2ndLine("Standby");
+						#endif
 						LEDStandby();
 						}
 					}

@@ -14,12 +14,12 @@ DAC and ADC can NOT be used at the same time, also if the DAC output is filtered
 #define RTCen	0b01100011
 #define RTCdis    0b01100000
 
-#define P0M1def   0b00010011;
+#define P0M1def   0b00010011
 
-#define DAC1	0b01001000; //ADC Clk  (0,5 to 3,3MHz allowed) Divisor 3 disable DAC0,  enable DAC1
-#define ADC1	0b01000000; //ADC Clk  (0,5 to 3,3MHz allowed) Divisor 3 disable DAC0, disable DAC1
+#define DAC1	0b01001000	//ADC Clk  (0,5 to 3,3MHz allowed) Divisor 3 disable DAC0,  enable DAC1
+#define ADC1	0b01000000	//ADC Clk  (0,5 to 3,3MHz allowed) Divisor 3 disable DAC0, disable DAC1
 
-#define DAC1Port  P0_4
+#define DAC1Port  P0_4		//should be pulled low by an open drain output if not controlled by the DAC
 
 void InitMCU()
 {
@@ -48,13 +48,13 @@ void InitMCU()
 	//P1.0 Quasi-Bi TxD
 	//P1.1 Quasi-Bi RxD
 	//P1.2 Open-Drain SCL
-	//P1.3 Open-Drain SDA
+	//P1.3 Input only Motion Detector Input (no quasi-bi possible) SDA
 	//P1.4 Quasi-Bi RC5 input
 	//P1.5 Input only (no configuration possible) Key
 	//P1.6 Push-Pull OCB PWM for status LED
 	//P1.7 Push-Pull OCC PWM for status LED 
 	P1M1 = 0b00101100;
-	P1M2 = 0b11001100;
+	P1M2 = 0b11000100;
 	//apply save start-up configuration
 	P1   = 0b11111111;
 
@@ -73,6 +73,7 @@ void InitMCU()
 
     	//P3 is unused
 
+	#ifdef LCD
 	//Init SPI
 	//0,1 = 00 = CPUCLK/4 = 1,5MHz (max 3MHz)
 	//2 = 1 CLK Phase
@@ -82,6 +83,7 @@ void InitMCU()
 	//6 = 1 Enable SPI
 	//7 = 1 Master / Slave defined by Bit 4
 	SPCTL = 0b11011100;
+	#endif
 
 	//Init ADC & DAC
 	ADINS  = 0b00010010; //Enable AIN01 and AIN10 for analogue input

@@ -22,6 +22,8 @@
 				//must go below TempLimit before reenabled
 #define TempDerating	5	//kehrwert Differenznormierung in 1/256
 
+#define maxDisplayTimer	0xFF
+
 unsigned int Temperature;		//will be filled up to 16 bit with 64 datapoint moving average
 
 __bit overTemp;
@@ -31,5 +33,9 @@ void MeasureTemperature();
 unsigned char LimitOutput();
 
 unsigned char GetTemperature();
+
+#ifdef LCD
+void LCD_Temperature();
+#endif
 
 #endif

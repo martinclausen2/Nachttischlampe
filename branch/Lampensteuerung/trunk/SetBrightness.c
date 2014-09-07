@@ -24,8 +24,10 @@ void LCD_SendBrightness()
 {
 	unsigned int displayvalue;
 	displayvalue = (Brightness*202) >> 8;		//scale to 100%
+	#ifdef LCD
 	LCD_SendString2ndLine("On ");
 	printf_fast("%3d%%        ", displayvalue);
+	#endif
 }
 
 void SendBrightness()
@@ -46,8 +48,6 @@ void Update_PWM_Offset()
 void InitBrightness()
 {
 	Update_PWM_Offset();
-
-	LCD_ReturnHome();
 
 	Brightness_start=Read_EEPROM(EEAddr_CurrentBrightness);
 	ExtBrightness_last=Read_EEPROM(EEAddr_ExtBrightness_last_MSB)<<8;
@@ -226,7 +226,9 @@ void SwLightOff()
 		Brightness=0;
 		PWM_SetupDim(fadetime, 0);
 		SetExtBrightness_last();
+		#ifdef LCD
 		LCD_SendStringFill2ndLine("Standby");
+		#endif
 		LEDStandby();
 		}
 }
