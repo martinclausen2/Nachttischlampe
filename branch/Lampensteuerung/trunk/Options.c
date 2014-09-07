@@ -45,7 +45,10 @@ void Alarm()
 		{
 		SetupAlarmDim();		// fade in to required brightness in on or off,
 					// no fade in if already brighter, Alarm_StepDim() takes care of this behavior
-		LightOn=1;
+		SendBrightness();		//switch e.g. DAC on, set flag
+		#ifdef LCD
+		LCD_SendStringFill2ndLine("Alarm!");
+		#endif
 		Alarmflag=1;
 		}
 }
