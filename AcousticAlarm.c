@@ -21,7 +21,7 @@
 
 #define sizesound 6
 
-#define repeatsound 0x7F
+#define repeatsound 0xFF
 
 __code unsigned int sound[sizesound][2] = {{65000, 700},{45000, 950},{35000, 750},{25000, 1150},{65000, 0},{65000, 0}};
 
@@ -40,12 +40,13 @@ __code unsigned int sound[sizesound][2] = {{65000, 700},{45000, 950},{35000, 750
 		};
 	} AudioGain_t;
 
-void AcusticDDSAlarm()
+__bit AcousticDDSAlarm()
 {
 	unsigned int accu=0;
 	unsigned int i;
 	unsigned char j;
-	unsigned char k=0;
+	unsigned char k;
+	__bit user=0;
 
 	AudioGain_t AudioGain;
 
@@ -64,6 +65,7 @@ void AcusticDDSAlarm()
 				AD1DAT3=sinetable[((accu>>8) & 0xFF)];
 				if(~KeysPort & SelKeys)
 					{
+					user=1;
 					goto endofalarm;
 					}
 				}
@@ -74,6 +76,7 @@ void AcusticDDSAlarm()
 	P0_6 = PhotoGain.LSB;	//restore gain
 	P0_7 = PhotoGain.MSB;
 	EA=1;
+	return user;
 }
 
 void BeepVol(unsigned char Volume)

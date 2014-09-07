@@ -46,7 +46,7 @@ __bit FocusBacklight;
 #include "SetBrightness.c"
 #include "I2C_RTC.c"
 #include "RC5.c"
-#include "AcusticAlarm.c"
+#include "AcousticAlarm.c"
 #include "Options.c"
 
 /** Main loop */
@@ -220,8 +220,16 @@ void main()
 				{
 				SwBackLightOn(1);					//switch on now
 				LCD_SendStringFill2ndLine(&Alarmtext[0]);
-				AcusticDDSAlarm();
-				Minutes2Signal=Read_EEPROM(EEAddr_AlarmTimeSnooze);	//start snooze
+				if (AcousticDDSAlarm())
+					{
+					Minutes2Signal=Read_EEPROM(EEAddr_AlarmTimeSnooze);	//button was pressed, start snooze
+					}
+				else
+					{
+					AlarmEnd();					//timeout occured, terminate alarm and switch off
+					SwAllLightOff();
+					LCD_SendStringFill2ndLine("Alarm Time Out");
+					}
 				}
 			RefreshTime=0;
 			RefreshTimeRTC=0;
