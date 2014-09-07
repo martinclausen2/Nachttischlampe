@@ -1,0 +1,45 @@
+Version: 5
+-------------------------------------------------------------------------------
+Bereits Kunde: nein
+Kundennummer: 
+Firma: 
+Abteilung: 
+Anrede: Herr
+Vorname: Martin
+Name: Clausen
+Strasse: Flittarder Hauptstraße
+Hausnummer: 72
+Zusatz:
+Postleitzahl: 51061
+Ort: Köln
+Land: Deutschland
+
+Email: martin@clausen-web.de
+Telefon: 
+Mobil: +49 176 62242458
+
+Zahlungsart: Rechnung
+
+Abeichende Lieferadresse: nein
+Firma: ?
+Abteilung: ?
+Anrede: Frau/Herr
+Vorname: ?
+Name: ?
+Strasse: ?
+Hausnummer: ?
+Zusatz: ?
+Postleitzahl: ?
+Ort: ?
+Land: ?
+
+-------------------------------------------------------------------------------
+Layout 1
+Name: LampenSteuerung.brd
+Format: Eagle
+Lagenzahl: 2
+x (in mm): 41,6
+y (in mm): 34,2
+Bestellmenge: 5
+Überproduzierte: ja
+Anmerkungen:
