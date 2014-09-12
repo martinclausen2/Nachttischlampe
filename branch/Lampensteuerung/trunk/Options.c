@@ -33,7 +33,7 @@ void Alarm_StepDim()
 //prepare wake-up light
 void SetupAlarmDim()
 {
-	AlarmDim_Cnt_Reload=(Read_EEPROM(EEAddr_LightFading)*25*60)/Read_EEPROM(EEAddr_AlarmFrontBrightness);
+	AlarmDim_Cnt_Reload=(Read_EEPROM(EEAddr_LightFading)*RTCIntfrequ*60)/Read_EEPROM(EEAddr_AlarmFrontBrightness);
 	AlarmDim_Cnt=AlarmDim_Cnt_Reload;
 }
 
@@ -408,7 +408,7 @@ void Options()
 					case 8:
 						InitEEPROM();
 						break;
-					#ifdef LCD						
+					#ifdef LCD
 					case 9:
 						SetupContrast();
 						break;

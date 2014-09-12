@@ -9,7 +9,7 @@ unsigned char LEDFlashCount;	//Number of flashes currently required, should not 
 unsigned char LEDFlashSeqCounter;	//Number of flashes * 2 (on & off) to be produced in this sequence
 
 #define LEDFlashMaxSeq	8	//max. number of flashes in a squence, should not exceed 0x7F ...
-#define LEDmaxFlashTimer	5	//cycles to execute before next flash toggel happens
+#define LEDmaxFlashTimer	4	//cycles to execute before next flash toggel happens
 
 #define BlueLEDPort 	P2_6
 #define GreenLEDPort 	P1_6

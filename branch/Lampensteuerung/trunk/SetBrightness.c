@@ -4,7 +4,7 @@
 
 #define maxBrightness	0x7F		//avoid overflow with signed numbers, should be filled with 1 from MSB to LSB
 #define maxRawPWM		0x3FFF		// =  maxBrigntess^2
-#define fadetime		150
+#define fadetime		100
 
 #define WriteTime		0xFF		//time until new brightness value is saved to the eeprom
 
@@ -20,6 +20,24 @@ signed int PWM_setlimited = 0;		//current pwm value after limiter
 signed int PWM_incr = 0;			//pwm dimming step size
 unsigned int PWM_incr_cnt = 0;		//no of steps required to reach targed PWM value
 
+void PWM_Set()
+{
+	AD1DAT3 = ((PWM_setlimited >> 6) & 0x00FF);	// set analogue output
+	if (PWM_setlimited)
+		{
+		// add min pulse width => we do not use full 16 bit resolution
+		// & reach PWM = 100% on for Brightness = 0x7F
+		OCRDH =  ((PWM_setlimited >> 6) & 0x00FF);
+		OCRDL = (((PWM_setlimited << 2) & 0x00FC) | 0x0003);
+		}
+	else
+		{
+		OCRDH = 0;
+		OCRDL = 0;
+		}
+	TCR21 = PLLSetting;	//Set PLL prescaler and start CCU register update
+}
+
 void LCD_SendBrightness()
 {
 	unsigned int displayvalue;
@@ -32,11 +50,12 @@ void LCD_SendBrightness()
 
 void SendBrightness()
 {
-	LightOn=1;
 	ADMODB = DAC1;
-	DAC1Port = 1;
+	PWM_Set();	//importent order: first DAC on then imedeatly wirte value to avoid spike on output
+	LightOn=1;
 	LCD_SendBrightness();
 	LEDOn();
+	DAC1Port = 1;
 }
 
 void Update_PWM_Offset()
@@ -81,24 +100,6 @@ void StoreBrightness()
 			}
 		WriteTimer=0;
 		}
-}
-
-void PWM_Set()
-{
-	AD1DAT3 = ((PWM_setlimited >> 6) & 0x00FF);	// set analogue output
-	if (PWM_setlimited)
-		{
-		// add min pulse width => we do not use full 16 bit resolution
-		// & reach PWM = 100% on for Brightness = 0x7F
-		OCRDH =  ((PWM_setlimited >> 6) & 0x00FF);
-		OCRDL = (((PWM_setlimited << 2) & 0x00FC) | 0x0003);
-		}
-	else
-		{
-		OCRDH = 0;
-		OCRDL = 0;
-		}
-	TCR21 = PLLSetting;	//Set PLL prescaler and start CCU register update
 }
 
 void PWM_StepDim()		// perform next dimming step, must frquently called for dimming action
@@ -198,7 +199,7 @@ void SwLightOn()
 			{
 			if (minBrightness>Brightness_start)
 				{
-				Brightness = Brightness_start;		// .. to last value if it is samller than minimum brightness
+				Brightness = Brightness_start;		// .. to last value if it is smaller than minimum brightness
 				}
 			else
 				{
@@ -210,6 +211,7 @@ void SwLightOn()
 			Brightness = temp;				// or just take the calculated value!
 			}
 		PWM_SetupDim(fadetime, 0);
+		LimitOutput();
 		SendBrightness();
 		}
 }
@@ -218,8 +220,6 @@ void SwLightOff()
 {
 	if (1==LightOn)						//remote signal might try to switch a switched on light on again
 		{
-		ADMODB = ADC1;
-		DAC1Port = 0;
 		LightOn=0;
 		Alarmflag=0;
 		Brightness_start=Brightness;

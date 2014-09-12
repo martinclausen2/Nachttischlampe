@@ -13,19 +13,20 @@
 
 #define LCD
 
-#define KeyPressShort	20
-#define KeyPressLong	60
+#define KeyPressShort	15
+#define KeyPressLong	45
 #define KeyPressLonger	KeyPressLong*2
 
 #define isrregisterbank	2		//for all isr on the SAME priority level 
 
 void T0_isr(void) __interrupt (1);		//int from Timer 0 to read RC5 state
 void T1_isr(void) __interrupt (3);		//int from Timer 1 to read encoder state
-void WDT_RTC_isr(void) __interrupt (10);	//int from internal RTC to update PWM read keys
+void WDT_RTC_isr(void) __interrupt (10);	//int from internal RTC to update PWM, read keys, ...
 
 __bit volatile TimerFlag;
 __bit Alarmflag;
 __bit LightOn;
+__bit enableExtBrightness;
 
 #include "Options.h"
 #ifdef LCD
@@ -109,7 +110,12 @@ void main()
 				}
 			else
 				{
-				MeasureExtBrightness();
+				if(!PWM_setlimited)	//switch ADC only on if DAC is really not needed any more
+					{
+					ADMODB = ADC1;
+					DAC1Port = 0;
+					MeasureExtBrightness();
+					}
 				WriteTimer=0;
 	 			if(overTemp)
 	 				{

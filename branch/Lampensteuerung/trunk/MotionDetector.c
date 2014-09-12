@@ -17,7 +17,7 @@ void MotionDetector()
 			MotionDetectorMinBrightness *= MotionDetectorMinBrightness;
 			if (LightOn | (((ExtBrightness>>8) & 0xFFFF) <= MotionDetectorMinBrightness))	   //trigger only if light is on already or if not to bright anyway
 				{
-				MotionDetectorTimer=Read_EEPROM(EEAddr_DetectorTimeout)*25*60-(25*60-1);  //DetectorTimeout is here at least 1, 1 is for instandly off
+				MotionDetectorTimer=(Read_EEPROM(EEAddr_DetectorTimeout)-1)*RTCIntfrequ*60+1;  //DetectorTimeout is here at least 1, 1 is for instandly off (here we need to have one cycle at least)
 				SwLightOn();
 				#ifdef LCD
 				LCD_SendStringFill2ndLine("Motion detected");

@@ -11,7 +11,6 @@ volatile unsigned char KeyState;		//stores the keys state
 volatile unsigned char OldKeyState;
 volatile unsigned char KeyPressDuration;
 
-
 void WDT_RTC_isr(void) __interrupt(10) __using(isrregisterbank)	//int from internal RTC to update PWM read keys
 {
 	TimerFlag=1;					//notify main program
