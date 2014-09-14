@@ -46,7 +46,7 @@
 unsigned char timedate[sizetimedate];	//array containing current time and date
 					// format: 0 seconds, 1 minutes, 2 hours, 3 days, 4 weekdays, 5 months, 6 years
 
-__code unsigned char mintimedatevalue[sizetimedate] =  { 0,  0,  0,  1,  1,  1, 13};
+__code unsigned char mintimedatevalue[sizetimedate] =  { 0,  0,  0,  1,  1,  1, 14};
 __code unsigned char maxtimedatevalue[sizetimedate] =  {59, 59, 23, 31,  7, 12, 79};
 __code unsigned char timedatecursorpos[sizetimedate] = { 0,  4,  1, 11,  8, 14,  0};
 

@@ -31,7 +31,7 @@
 #define alldays 8
 
 #define minLightFading 01
-#define maxLightFading 40			//avoid overflow of AlarmDim_Cnt_Reload
+#define maxLightFading 99			//avoid overflow of encodersetup value
 #define minTime2Signal 00
 #define maxTime2Signal 99			//avoid overflow of encodersetup value
 
@@ -84,7 +84,7 @@ __code char OptionNames[maxOption+1][15] = {"Set Alarm     ",
 				 	 "Set RC Address",
 				 	 "Key Beep Vol  ",
 				 	 "Reset settings",
-				 	 "V4 2014-02-22 "};
+				 	 "V5 2014-09-14 "};
 
 __code char noyestext[2][4] = {" no", "yes"};
 

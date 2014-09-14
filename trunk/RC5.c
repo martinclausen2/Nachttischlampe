@@ -5,7 +5,6 @@
 #define IntT0reload 0x04			//T0 extension to clock RC5 receiver
 
 #define _RC5inp		P1_5		//define RC5 input pin
-#define _CS_Flash		P0_5		//define /CS for serial FLASh and /Shuntown for audio amp
 #define RC5output		P2.1		//define RC5 output pin, assembler style required
 
 #define RC5Addr_front	27		//address for frontlight brightness
@@ -254,82 +253,84 @@ void SetBrightnessRemote(unsigned char i)
 		}
 }
 
-//check 12==rCounter before calling!!!
 void DecodeRemote()
 {
 	__bit static RTbitold;				//Togglebit des letzten Befehls von RC5
 
-	if (RC5Addr==rAddress)
+	if (12==rCounter)
 		{
-		if (RTbit ^ RTbitold)			//Neue Taste erkannt
+		if (RC5Addr==rAddress)
 			{
-			switch (rCommand)
+			if (RTbit ^ RTbitold)			//Neue Taste erkannt
 				{
-				case 1:
-				case 12:			//Standby
-					SwAllLightOn();
-					break;
-				case 13:			//mute
-					SwAllLightOff();
-					break;
-  				}
-			}
-
-  		switch (rCommand)			//new or same key pressed
-  			{
-  			case 16:				//incr vol
-				SetLightRemote(0, RemoteSteps);
-				break;
-  			case 17:				//decr vol
-				SetLightRemote(0, -RemoteSteps);
-				break;
-			case 32:				//incr channel
-				SetLightRemote(1, RemoteSteps);
-				break;
-			case 33:				//decr channel
-				SetLightRemote(1, -RemoteSteps);
-				break;
-  			}
-  		RTbitold=RTbit;				//Togglebit speichern
-  		}
-  	else if (RC5Addr_front==rAddress)
-  		{
-  		SetBrightnessRemote(0);
-  		}
-  	else if (RC5Addr_back==rAddress)
-  		{
-  		SetBrightnessRemote(1);
-  		}
-  	else if (RC5Addr_com==rAddress)
-  		{
-  		switch (rCommand)
-  			{
-  			case RC5Cmd_AlarmStart:
-  				if (ComModeAlarm<=ReceiverMode)
-  					{
-  					Alarm();
-  					}
-  				break;
-  			case RC5Cmd_AlarmEnd:
-  				if (ComModeAlarm<=ReceiverMode)
-  					{
-  					AlarmEnd();
-					LCD_SendBrightness(FocusBacklight+1);
-  					}
-  				break;
-  			case RC5Cmd_Off:
-				if (ComModeConditional<=ReceiverMode)
+				switch (rCommand)
 					{
-					SwAllLightOff();
-					}
-  				break;
-  			case RC5Cmd_On:
-				if (ComModeConditional<=ReceiverMode)
-					{
-					SwAllLightOn();
-					}
-  				break;
-  			}
-  		}
-	rCounter=0;					//Nach Erkennung zurücksetzen
+					case 1:
+					case 12:			//Standby
+						SwAllLightOn();
+						break;
+					case 13:			//mute
+						SwAllLightOff();
+						break;
+	  				}
+				}
+	
+	  		switch (rCommand)			//new or same key pressed
+	  			{
+	  			case 16:				//incr vol
+					SetLightRemote(0, RemoteSteps);
+					break;
+	  			case 17:				//decr vol
+					SetLightRemote(0, -RemoteSteps);
+					break;
+				case 32:				//incr channel
+					SetLightRemote(1, RemoteSteps);
+					break;
+				case 33:				//decr channel
+					SetLightRemote(1, -RemoteSteps);
+					break;
+	  			}
+	  		RTbitold=RTbit;				//Togglebit speichern
+	  		}
+	  	else if (RC5Addr_front==rAddress)
+	  		{
+	  		SetBrightnessRemote(0);
+	  		}
+	  	else if (RC5Addr_back==rAddress)
+	  		{
+	  		SetBrightnessRemote(1);
+	  		}
+	  	else if (RC5Addr_com==rAddress)
+	  		{
+	  		switch (rCommand)
+	  			{
+	  			case RC5Cmd_AlarmStart:
+	  				if (ComModeAlarm<=ReceiverMode)
+	  					{
+	  					Alarm();
+	  					}
+	  				break;
+	  			case RC5Cmd_AlarmEnd:
+	  				if (ComModeAlarm<=ReceiverMode)
+	  					{
+	  					AlarmEnd();
+						LCD_SendBrightness(FocusBacklight+1);
+	  					}
+	  				break;
+	  			case RC5Cmd_Off:
+					if (ComModeConditional<=ReceiverMode)
+						{
+						SwAllLightOff();
+						}
+	  				break;
+	  			case RC5Cmd_On:
+					if (ComModeConditional<=ReceiverMode)
+						{
+						SwAllLightOn();
+						}
+	  				break;
+	  			}
+	  		}
+		rCounter=0;					//Nach Erkennung zurücksetzen
+		}
 }

@@ -1,27 +1,19 @@
 /* Functions to play sound
- * storage for sound: plain 8 bit data stored in external data flash connected to spi port
- *    => do no access flash and lcd simultaniously!
- * /cs of flash and shutdown of amplifier can share the same control line
+ * storage for sound: plain 8 bit data stored in program flash
  * internal DAC is used as an output
  * DAC output should be filtered
  * address lines for volume are shared with the get_brightness functions
  *    => disable brightness mesurement during play back and restore settings afterwards
- *
- * Functions:
- * setup menu, accessable during start up
- * external flash chip erase followed by 
- * loading external data flash on spi port with data from uart
- *
- * V0 2013-01-10
  */
-
-// Function to generate sinewaves with different length and frequency using a DDS algorithm
 
 #include "sinetable.c"
 
+#define _CS_Flash		P0_5	//define /Shuntown for audio amp
+
 #define sizesound 6
 
-#define repeatsound 0xFF
+#define repeatsound 0xFF	//should be no smaller than: volumes steps * 2^5 = 2^2 * 2^5 = 128, other wise max. volume is not reached
+			//total duration = 3 * 256 = 768 = ca. 13 minutes
 
 __code unsigned int sound[sizesound][2] = {{65000, 700},{45000, 950},{35000, 750},{25000, 1150},{65000, 0},{65000, 0}};
 
@@ -40,6 +32,8 @@ __code unsigned int sound[sizesound][2] = {{65000, 700},{45000, 950},{35000, 750
 		};
 	} AudioGain_t;
 
+// Function to generate sinewaves with different length and frequency using a DDS algorithm
+// includes timeout
 __bit AcousticDDSAlarm()
 {
 	unsigned int accu=0;
@@ -76,6 +70,7 @@ __bit AcousticDDSAlarm()
 	P0_6 = PhotoGain.LSB;	//restore gain
 	P0_7 = PhotoGain.MSB;
 	EA=1;
+	AD1DAT3=sinetable[0];
 	return user;
 }
 
@@ -104,6 +99,7 @@ void BeepVol(unsigned char Volume)
 		P0_6 = PhotoGain.LSB;	//restore gain
 		P0_7 = PhotoGain.MSB;
 		EA=1;
+		AD1DAT3=sinetable[0];
 	}
 }
 

@@ -169,7 +169,7 @@ void Alarm_StepDim_all()
 //prepare wake-up light
 void SetupAlarmDim(unsigned char i)
 {
-	AlarmDim_Cnt_Reload[i]=(Read_EEPROM(EEAddr_LightFading)*25*60)/Read_EEPROM(EEAddr_AlarmFrontBrightness+i);
+	AlarmDim_Cnt_Reload[i]=(Read_EEPROM(EEAddr_LightFading)*RTCIntfrequ*60)/Read_EEPROM(EEAddr_AlarmFrontBrightness+i);
 	AlarmDim_Cnt[i]=AlarmDim_Cnt_Reload[i];
 }
 
@@ -648,108 +648,111 @@ void Options()
 
 	while(stay)
 		{
-		// Select key is pressed, show preview of action
-		if (TimerFlag && KeySelect == KeyState)
+		if (TimerFlag)
 			{
-			if (KeyPressShort == KeyPressDuration)
+			TimerFlag = 0;		//acknowledge
+			// Select key is pressed, show preview of action
+			if (KeySelect == KeyState)
 				{
-				LCD_SendStringFill2ndLine("Exit Options");
-				}
-			else if (KeyPressLong == KeyPressDuration)
-				{
-				LCD_SendStringFill2ndLine(&Canceltext[0]);
-				}
-			TimerFlag = 0;		//acknowledge key pressing
-			}
-
-		// A Key was pressed if OldKeyState != 0 and Keystate = 0
-		// OldKeyState = 0 must be set by receiving program after decoding as a flag
-		else if ((KeySelect == OldKeyState) && (0 == KeyState))
-			{
-			if (KeyPressShort > KeyPressDuration)
-				{
-				OldKeyState=0;				//acknowldge key pressing
-				LCD_ClearDisplay();			//prepare display for submenu
-				LCD_SendString(&OptionNames[Option][0]);	// display option name in first line
-				switch (Option)
+				if (KeyPressShort == KeyPressDuration)
 					{
-					case 0:
-						SelectAlarm();
-						break;
-					case 1:
-						SetupClock();
-						break;
-					case 2:
-						SetupBrightness(EEAddr_AlarmFrontBrightness, 1);
-						break;
-					case 3:
-						SetupBrightness(EEAddr_AlarmBackBrightness, 2);
-						break;
-					case 4:
-						SetupMinutes(EEAddr_LightFading, minLightFading, maxLightFading);
-						break;
-					case 5:
-						SetupMinutes(EEAddr_AlarmTime2Signal, minTime2Signal, maxTime2Signal);
-						break;
-					case 6:
-						SetupMinutes(EEAddr_AlarmTimeSnooze, minTime2Signal, maxTime2Signal);
-						break;
-					case 7:
-						SetupComMode(EEAddr_ReceiverMode);
-						ReceiverMode=Read_EEPROM(EEAddr_ReceiverMode);
-						break;
-					case 8:
-						SetupComMode(EEAddr_SenderMode);
-						SenderMode=Read_EEPROM(EEAddr_SenderMode);
-						break;
-					case 9:
-						SetupBrightness(EEAddr_MinimumFrontBrightness, 1);
-						break;
-					case 10:
-						SetupBrightness(EEAddr_MinimumBackBrightness, 2);
-						break;
-					case 11:
-						PWM_Offset[1]=0;
-						SetupBrightness(EEAddr_OffsetFrontBrightness, 1);
-						Update_PWM_Offset(1);
-						break;
-					case 12:
-						PWM_Offset[2]=0;
-						SetupBrightness(EEAddr_OffsetBackBrightness, 2);
-						Update_PWM_Offset(2);
-						break;
-					case 13:
-						SetupBrightness(EEAddr_DispBrightness, 0);
-						break;
-					case 14:
-						SetupContrast();
-						break;
-					case 15:
-						SetupRCAddress();
-						break;
-					case 16:
-						SetupBeepVolume();
-						break;
-					case 17:
-						InitEEPROM();
-						break;
+					LCD_SendStringFill2ndLine("Exit Options");
 					}
-				LCD_Option(Option);	//Refresh display after setup function
+				else if (KeyPressLong == KeyPressDuration)
+					{
+					LCD_SendStringFill2ndLine(&Canceltext[0]);
+					}
 				}
-			else if (KeyPressLong > KeyPressDuration)
+
+			// A Key was pressed if OldKeyState != 0 and Keystate = 0
+			// OldKeyState = 0 must be set by receiving program after decoding as a flag
+			else if ((KeySelect == OldKeyState) && (0 == KeyState))
 				{
-				stay=0;
+				if (KeyPressShort > KeyPressDuration)
+					{
+					OldKeyState=0;				//acknowldge key pressing
+					LCD_ClearDisplay();			//prepare display for submenu
+					LCD_SendString(&OptionNames[Option][0]);	// display option name in first line
+					switch (Option)
+						{
+						case 0:
+							SelectAlarm();
+							break;
+						case 1:
+							SetupClock();
+							break;
+						case 2:
+							SetupBrightness(EEAddr_AlarmFrontBrightness, 1);
+							break;
+						case 3:
+							SetupBrightness(EEAddr_AlarmBackBrightness, 2);
+							break;
+						case 4:
+							SetupMinutes(EEAddr_LightFading, minLightFading, maxLightFading);
+							break;
+						case 5:
+							SetupMinutes(EEAddr_AlarmTime2Signal, minTime2Signal, maxTime2Signal);
+							break;
+						case 6:
+							SetupMinutes(EEAddr_AlarmTimeSnooze, minTime2Signal, maxTime2Signal);
+							break;
+						case 7:
+							SetupComMode(EEAddr_ReceiverMode);
+							ReceiverMode=Read_EEPROM(EEAddr_ReceiverMode);
+							break;
+						case 8:
+							SetupComMode(EEAddr_SenderMode);
+							SenderMode=Read_EEPROM(EEAddr_SenderMode);
+							break;
+						case 9:
+							SetupBrightness(EEAddr_MinimumFrontBrightness, 1);
+							break;
+						case 10:
+							SetupBrightness(EEAddr_MinimumBackBrightness, 2);
+							break;
+						case 11:
+							PWM_Offset[1]=0;
+							SetupBrightness(EEAddr_OffsetFrontBrightness, 1);
+							Update_PWM_Offset(1);
+							break;
+						case 12:
+							PWM_Offset[2]=0;
+							SetupBrightness(EEAddr_OffsetBackBrightness, 2);
+							Update_PWM_Offset(2);
+							break;
+						case 13:
+							SetupBrightness(EEAddr_DispBrightness, 0);
+							break;
+						case 14:
+							SetupContrast();
+							break;
+						case 15:
+							SetupRCAddress();
+							break;
+						case 16:
+							SetupBeepVolume();
+							break;
+						case 17:
+							InitEEPROM();
+							break;
+						}
+					LCD_Option(Option);	//Refresh display after setup function
+					}
+				else if (KeyPressLong > KeyPressDuration)
+					{
+					stay=0;
+					}
+				else
+					{
+					LCD_CurrentOption(Option);	//Cancel key pressing, refresh display
+					}
+				OldKeyState=0;			//acknowldge key pressing
+				EncoderSteps = 0;			//reset steps
 				}
-			else
+			if (EncoderSetupValue(&Option, maxOption, 0))
 				{
-				LCD_CurrentOption(Option);	//Cancel key pressing, refresh display
+				LCD_CurrentOption(Option);
 				}
-			OldKeyState=0;			//acknowldge key pressing
-			EncoderSteps = 0;			//reset steps
-			}
-		if (EncoderSetupValue(&Option, maxOption, 0))
-			{
-			LCD_CurrentOption(Option);
 			}
 		PCON=MCUIdle;				//go idel, wake up by any int
 		}
