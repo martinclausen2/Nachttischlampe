@@ -4,7 +4,7 @@
 
 #define maxBrightness	0x7F		//avoid overflow with signed numbers, should be filled with 1 from MSB to LSB
 #define maxRawPWM		0x3FFF		// =  maxBrigntess^2
-#define DisplayDimCntStart 250		//time until display backlight fades out, max 0xFF
+#define DisplayDimCntStart 100		//time until display backlight fades out, max 0xFF
 #define startupfocus	1		//focus on back=1 or front=0
 #define fadetime		150
 

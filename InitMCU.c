@@ -10,6 +10,8 @@
 //Disable or Enable RTC with int on external high frequ crystal and clear int flag
 #define RTCen	0b01100011
 #define RTCdis    0b01100000
+#define RTCIntfrequ	10	//frequency at which RTC timer generates an interrupt diveded by the cases in the main loop
+				//adjust RTC reload value
 
 void InitMCU()
 {
@@ -152,12 +154,12 @@ void InitMCU()
     	TMOD = 0b00000010;	//Init T0 (auto reload timer), T1 (8 bit counter with 1:32 prescaler form 366Hz at 6MHz clk)
     	TCON = 0b01010000;	//gibt T0 & T1 frei
     	TH0 = 256-166;		//T0 high Byte => Reload-Wert
-        		       	//clk source is PCLK=CCLK/2, extended by Software with a 1:4 postscaler, effective frequency 4518Hz
+        		       		//clk source is PCLK=CCLK/2, extended by Software with a 1:4 postscaler, effective frequency 4518Hz
 	//Init Int
 	IP0H = 0b11111011;	//give all except clock on EX1 (IP0X.2) a higher priority, or clock may block encoder
-	IP0 = 0b00000000;
+	IP0  = 0b00000000;
 	IP1H = 0b11111111;
-	IP1 = 0b00000000;
+	IP1  = 0b00000000;
 
     	IEN0 = 0b11001110;	//Interupt internal RTC (Bit 6) enable, externe RTC on INT1 (Bit 2)
     				//T0 and T1 enable
