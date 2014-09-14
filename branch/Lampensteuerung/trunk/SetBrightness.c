@@ -4,7 +4,7 @@
 
 #define maxBrightness	0x7F		//avoid overflow with signed numbers, should be filled with 1 from MSB to LSB
 #define maxRawPWM		0x3FFF		// =  maxBrigntess^2
-#define fadetime		100
+#define fadetime		150
 
 #define WriteTime		0xFF		//time until new brightness value is saved to the eeprom
 

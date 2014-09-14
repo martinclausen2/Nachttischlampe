@@ -13,7 +13,7 @@ DAC and ADC can NOT be used at the same time, also if the DAC output is filtered
 //Disable or Enable RTC with int on external high frequ crystal and clear int flag
 #define RTCen	0b01100011
 #define RTCdis    0b01100000
-#define RTCIntfrequ	25	//frequency at which RTC timer generates an interrupt
+#define RTCIntfrequ	10	//frequency at which RTC timer generates an interrupt
 				//adjust RTC reload value
 
 #define P0M1def   0b00010011
@@ -98,9 +98,9 @@ void InitMCU()
 	//Read AD0DAT0, 1, 2, 3, 0, ...
 
 	//Init RTC of P89LPC93X
-	// config RTC as Timer with 7.373*10^6/128/25=2304 reload => 25Hz int source
-    	RTCH = 0x09; 
-    	RTCL = 0x00;
+	// config RTC as Timer with 7.373*10^6/128/40=1440 reload => 40Hz int source
+    	RTCH = 0x05; 
+    	RTCL = 0xA0;
     	RTCCON = RTCdis;
 	//enable when configured
 

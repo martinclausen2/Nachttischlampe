@@ -1,5 +1,4 @@
 /** Handels keys reading
- *  Hardware CCU of P89LPC93X
  */
 
 // Encoder and Keys should not overlap in their bits

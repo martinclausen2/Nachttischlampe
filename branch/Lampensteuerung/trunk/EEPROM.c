@@ -1,6 +1,6 @@
 /**
- * Options of LampenSteuerung incl. EEPROM access and passive Alarm
- * @file Options.c
+ * EEPROM access
+ * @file EEPROM.c
  */
 
 #include <p89lpc935_6.h>

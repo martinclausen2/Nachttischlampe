@@ -112,77 +112,80 @@ void DecodeRemote()
 {
 	__bit static RTbitold;				//Togglebit des letzten Befehls von RC5
 
-	if (RC5Addr==rAddress)
+	if (12==rCounter)
 		{
-		MotionDetectorTimer=0;	//reset any Motion Detector activity
-		if (RTbit ^ RTbitold)			//Neue Taste erkannt
+		if (RC5Addr==rAddress)
 			{
-			switch (rCommand)
+			MotionDetectorTimer=0;	//reset any Motion Detector activity
+			if (RTbit ^ RTbitold)			//Neue Taste erkannt
 				{
-				case 1:
-				case 12:			//Standby
-					SwLightOn();
-					break;
-				case 13:			//mute
-					SwLightOff();
-					break;
-  				}
-			}
-
-  		switch (rCommand)			//new or same key pressed
-  			{
-  			case 16:				//incr vol
-				SetLightRemote(RemoteSteps);
-				break;
-  			case 17:				//decr vol
-				SetLightRemote(-RemoteSteps);
-				break;
-			case 32:				//incr channel
-				SwLightOnMax();
-				WriteTimer=WriteTime;
-				break;
-			case 33:				//decr channel
-				SwLightOnMin();
-				WriteTimer=WriteTime;
-				break;
-  			}
-  		RTbitold=RTbit;				//Togglebit speichern
-  		}
-  	else if (RC5Addr_front==rAddress)
-  		{
-		MotionDetectorTimer=0;	//reset any Motion Detector activity
-  		SetBrightnessRemote();
-  		}
-  	else if (RC5Addr_com==rAddress)
-  		{
-		MotionDetectorTimer=0;	//reset any Motion Detector activity
-  		switch (rCommand)
-  			{
-  			case RC5Cmd_AlarmStart:
-  				if (ComModeAlarm<=ReceiverMode)
-  					{
-  					Alarm();
-  					}
-  				break;
-  			case RC5Cmd_AlarmEnd:
-  				if (ComModeAlarm<=ReceiverMode)
-  					{
-					LCD_SendBrightness();
-  					}
-  				break;
-  			case RC5Cmd_Off:
-				if (ComModeConditional<=ReceiverMode)
+				switch (rCommand)
 					{
-					SwLightOff();
-					}
-  				break;
-  			case RC5Cmd_On:
-				if (ComModeConditional<=ReceiverMode)
-					{
-					SwLightOn();
-					}
-  				break;
-  			}
-  		}
-	rCounter=0;					//Nach Erkennung zurücksetzen
+					case 1:
+					case 12:			//Standby
+						SwLightOn();
+						break;
+					case 13:			//mute
+						SwLightOff();
+						break;
+	  				}
+				}
+	
+	  		switch (rCommand)			//new or same key pressed
+	  			{
+	  			case 16:				//incr vol
+					SetLightRemote(RemoteSteps);
+					break;
+	  			case 17:				//decr vol
+					SetLightRemote(-RemoteSteps);
+					break;
+				case 32:				//incr channel
+					SwLightOnMax();
+					WriteTimer=WriteTime;
+					break;
+				case 33:				//decr channel
+					SwLightOnMin();
+					WriteTimer=WriteTime;
+					break;
+	  			}
+	  		RTbitold=RTbit;				//Togglebit speichern
+	  		}
+	  	else if (RC5Addr_front==rAddress)
+	  		{
+			MotionDetectorTimer=0;	//reset any Motion Detector activity
+	  		SetBrightnessRemote();
+	  		}
+	  	else if (RC5Addr_com==rAddress)
+	  		{
+			MotionDetectorTimer=0;	//reset any Motion Detector activity
+	  		switch (rCommand)
+	  			{
+	  			case RC5Cmd_AlarmStart:
+	  				if (ComModeAlarm<=ReceiverMode)
+	  					{
+	  					Alarm();
+	  					}
+	  				break;
+	  			case RC5Cmd_AlarmEnd:
+	  				if (ComModeAlarm<=ReceiverMode)
+	  					{
+						LCD_SendBrightness();
+	  					}
+	  				break;
+	  			case RC5Cmd_Off:
+					if (ComModeConditional<=ReceiverMode)
+						{
+						SwLightOff();
+						}
+	  				break;
+	  			case RC5Cmd_On:
+					if (ComModeConditional<=ReceiverMode)
+						{
+						SwLightOn();
+						}
+	  				break;
+	  			}
+	  		}
+		rCounter=0;					//Nach Erkennung zurücksetzen
+		}
 }

@@ -13,8 +13,8 @@
 
 #define LCD
 
-#define KeyPressShort	15
-#define KeyPressLong	45
+#define KeyPressShort	20
+#define KeyPressLong	60
 #define KeyPressLonger	KeyPressLong*2
 
 #define isrregisterbank	2		//for all isr on the SAME priority level 
@@ -53,6 +53,7 @@ __bit enableExtBrightness;
 /** Main loop */
 void main()
 {
+	unsigned char actionCounter=0xFF;
 	InitMCU();
 
 	#ifdef LCD
@@ -74,7 +75,7 @@ void main()
 		if (TimerFlag)
 			{
 			TimerFlag=0;
-			MeasureTemperature();	// always measure temp or we can not exit overtemp anymore
+			++actionCounter;
 			PWM_StepDim();		// do next dimming step
 			switch (LimitOutput())	// decide if temperature is ok and what to do about it, LimitOutput will act on PWM values
 				{
@@ -98,33 +99,10 @@ void main()
 					break;
 				}
 			PWM_Set();
-			#ifdef LCD
-			LCD_Temperature();
-			#endif
-			MotionDetector();
-
-			if (LightOn)
-				{
-				StoreBrightness();	// store brightness if reuqired
-				Alarm_StepDim();		// do next alarm dim step if required
-				}
-			else
-				{
-				if(!PWM_setlimited)	//switch ADC only on if DAC is really not needed any more
-					{
-					ADMODB = ADC1;
-					DAC1Port = 0;
-					MeasureExtBrightness();
-					}
-				WriteTimer=0;
-	 			if(overTemp)
-	 				{
-					LEDOverTemp();	// flash status led red
-					}
-				}
 
 			// check keys here since we can have only new input if timerflag was set by the keys interrupt program
 			// Select key is pressed, show preview of action
+			// need to check each time to generate single events directly from KeyPressDuration counter
 			if (KeySelect == KeyState)
 				{
 				if (KeyPressShort == KeyPressDuration)
@@ -143,65 +121,97 @@ void main()
 					}
 				}
 
-			// A Key was pressed if OldKeyState != 0 and Keystate = 0
-			// OldKeyState = 0 must be set by receiving program after decoding as a flag
-			else if ((KeySelect == OldKeyState) && (0 == KeyState))
+			switch (actionCounter)
 				{
-				OldKeyState=0;		//Ack any key anyway
-				MotionDetectorTimer=0;	//reset any Motion Detector activity
-				if (KeyPressShort > KeyPressDuration)
-					{
+				case 0:
+					DecodeRemote();
+					MotionDetector();
+
+					MeasureTemperature();		// always measure temp or we can not exit overtemp anymore
+					#ifdef LCD
+					LCD_Temperature();
+					#endif
+					break;
+				case 1:
 					if (LightOn)
 						{
-						SwLightOff();
+						StoreBrightness();	// store brightness if reuqired
+						Alarm_StepDim();		// do next alarm dim step if required
 						}
 					else
 						{
-						SwLightOn();
+						if(!PWM_setlimited)	//switch ADC only on if DAC is really not needed any more
+							{
+							ADMODB = ADC1;
+							DAC1Port = 0;
+							MeasureExtBrightness();
+							}
+						WriteTimer=0;
+			 			if(overTemp)
+			 				{
+							LEDOverTemp();	// flash status led red
+							}
 						}
-					}
-				else 
-					{
-					if (KeyPressLong > KeyPressDuration)
+					break;
+				case 2:
+					// A Key was pressed if OldKeyState != 0 and Keystate = 0
+					// OldKeyState = 0 must be set by receiving program after decoding as a flag
+					if ((KeySelect == OldKeyState) && (0 == KeyState))
+						{
+						OldKeyState=0;		//Ack any key anyway
+						MotionDetectorTimer=0;	//reset any Motion Detector activity
+						if (KeyPressShort > KeyPressDuration)
+							{
+							if (LightOn)
+								{
+								SwLightOff();
+								}
+							else
+								{
+								SwLightOn();
+								}
+							}
+						else 
+							{
+							if (KeyPressLong > KeyPressDuration)
+								{
+								Alarmflag=0;
+								Options();
+								}
+							if (LightOn)	// Cancel key pressing or return from options, refresh display
+								{
+								LCD_SendBrightness();
+								LEDOn();
+								}
+							else
+								{
+								#ifdef LCD
+								LCD_SendStringFill2ndLine("Standby");
+								#endif
+								LEDStandby();
+								}
+							}
+						}
+					break;
+				case 3:
+					// A Rotation occured if EncoderSteps!= 0
+					// EncoderSteps = 0 must be set by receiving program after decoding
+					if (EncoderSteps)
 						{
 						Alarmflag=0;
-						Options();
+						if (LightOn)
+							{
+							PWM_SetupDim(Brightness_steps, EncoderSteps);
+							EncoderSteps = 0;								//ack any steps
+							LCD_SendBrightness();
+							WriteTimer=WriteTime;
+							}
 						}
-					if (LightOn)	// Cancel key pressing or return from options, refresh display
-						{
-						LCD_SendBrightness();
-						LEDOn();
-						}
-					else
-						{
-						#ifdef LCD
-						LCD_SendStringFill2ndLine("Standby");
-						#endif
-						LEDStandby();
-						}
-					}
+
+					actionCounter=0xFF;	//last time slot, do reset counter with increment to 0
+					break;
 				}
 			}
-
-		if (12==rCounter)
-			{
-			DecodeRemote();
-			}
-
-		// A Rotation occured if EncoderSteps!= 0
-		// EncoderSteps = 0 must be set by receiving program after decoding
-		if (EncoderSteps)
-			{
-			Alarmflag=0;
-			if (LightOn)
-				{
-				PWM_SetupDim(Brightness_steps, EncoderSteps);
-				EncoderSteps = 0;								//ack any steps
-				LCD_SendBrightness();
-				WriteTimer=WriteTime;
-				}
-			}
-
 		PCON=MCUIdle;				//go idel, wake up by any int
 	}
 }

@@ -1,5 +1,5 @@
 /**
- * Options of LampenSteuerung incl. EEPROM access and passive Alarm
+ * Options of LampenSteuerung incl. passive Alarm
  * @file Options.c
  */
 
@@ -335,6 +335,7 @@ void Options()
 		// Select key is pressed, show preview of action
 		if (TimerFlag)
 			{
+			TimerFlag = 0;		//acknowledge
 			LEDFlashing();
 			if (KeySelect == KeyState)
 				{
@@ -361,75 +362,74 @@ void Options()
 					LEDCancel();
 					}
 				}
-			TimerFlag = 0;		//acknowledge key pressing
-			}
 
-		// A Key was pressed if OldKeyState != 0 and Keystate = 0
-		// OldKeyState = 0 must be set by receiving program after decoding as a flag
-		else if ((KeySelect == OldKeyState) && (0 == KeyState))
-			{
-			if (KeyPressShort > KeyPressDuration)
+			// A Key was pressed if OldKeyState != 0 and Keystate = 0
+			// OldKeyState = 0 must be set by receiving program after decoding as a flag
+			else if ((KeySelect == OldKeyState) && (0 == KeyState))
 				{
-				OldKeyState=0;				//acknowldge key pressing
-				#ifdef LCD
-				LCD_ClearDisplay();			//prepare display for submenu
-				LCD_SendString(&OptionNames[Option][0]);	// display option name in first line
-				#endif
-				LEDFlashReset();				//prepare LED
-				switch (Option)
+				if (KeyPressShort > KeyPressDuration)
 					{
-					case 0:
-						SetupBrightness(EEAddr_MinimumFrontBrightness);
-						break;
-					case 1:
-						PWM_Offset=0;
-						SetupBrightness(EEAddr_OffsetFrontBrightness);
-						Update_PWM_Offset();
-						break;
-					case 2:
-						SetupBrightness(EEAddr_AlarmFrontBrightness);
-						break;
-					case 3:
-						SetupMinutes(EEAddr_LightFading, minLightFading, maxLightFading);
-						break;
-					case 4:
-						SetupMinutes(EEAddr_DetectorTimeout, minDetectorTimeout, maxDetectorTimeout);
-						break;
-					case 5:
-						SetupExtBrightness();
-						break;
-					case 6:
-						SetupRCAddress();
-						break;
-					case 7:
-						SetupComMode(EEAddr_ReceiverMode);
-						ReceiverMode=Read_EEPROM(EEAddr_ReceiverMode);
-						break;
-					case 8:
-						InitEEPROM();
-						break;
+					OldKeyState=0;				//acknowldge key pressing
 					#ifdef LCD
-					case 9:
-						SetupContrast();
-						break;
+					LCD_ClearDisplay();			//prepare display for submenu
+					LCD_SendString(&OptionNames[Option][0]);	// display option name in first line
 					#endif
+					LEDFlashReset();				//prepare LED
+					switch (Option)
+						{
+						case 0:
+							SetupBrightness(EEAddr_MinimumFrontBrightness);
+							break;
+						case 1:
+							PWM_Offset=0;
+							SetupBrightness(EEAddr_OffsetFrontBrightness);
+							Update_PWM_Offset();
+							break;
+						case 2:
+							SetupBrightness(EEAddr_AlarmFrontBrightness);
+							break;
+						case 3:
+							SetupMinutes(EEAddr_LightFading, minLightFading, maxLightFading);
+							break;
+						case 4:
+							SetupMinutes(EEAddr_DetectorTimeout, minDetectorTimeout, maxDetectorTimeout);
+							break;
+						case 5:
+							SetupExtBrightness();
+							break;
+						case 6:
+							SetupRCAddress();
+							break;
+						case 7:
+							SetupComMode(EEAddr_ReceiverMode);
+							ReceiverMode=Read_EEPROM(EEAddr_ReceiverMode);
+							break;
+						case 8:
+							InitEEPROM();
+							break;
+						#ifdef LCD
+						case 9:
+							SetupContrast();
+							break;
+						#endif
+						}
+					LCD_Option(Option);	//Refresh display after setup function
 					}
-				LCD_Option(Option);	//Refresh display after setup function
+				else if (KeyPressLong > KeyPressDuration)
+					{
+					stay=0;
+					}
+				else
+					{
+					LCD_CurrentOption(Option);	//Cancel key pressing, refresh display
+					}
+				OldKeyState=0;			//acknowldge key pressing
+				EncoderSteps = 0;			//reset steps
 				}
-			else if (KeyPressLong > KeyPressDuration)
+			if (EncoderSetupValue(&Option, maxOption, 0))
 				{
-				stay=0;
+				LCD_CurrentOption(Option);
 				}
-			else
-				{
-				LCD_CurrentOption(Option);	//Cancel key pressing, refresh display
-				}
-			OldKeyState=0;			//acknowldge key pressing
-			EncoderSteps = 0;			//reset steps
-			}
-		if (EncoderSetupValue(&Option, maxOption, 0))
-			{
-			LCD_CurrentOption(Option);
 			}
 		PCON=MCUIdle;				//go idel, wake up by any int
 		}

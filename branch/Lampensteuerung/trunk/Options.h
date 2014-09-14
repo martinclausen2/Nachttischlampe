@@ -1,5 +1,5 @@
 /**
- * Options of LampenSteuerung incl. EEPROM access and passive Alarm
+ * Options of LampenSteuerung incl. passive Alarm
  * @file Options.h
  */
 
@@ -29,7 +29,7 @@
 #endif
 
 #define minLightFading 01
-#define maxLightFading 40			//avoid overflow of AlarmDim_Cnt_Reload
+#define maxLightFading 30
 
 #define minDetectorTimeout 00		//0 = kein Bewegungssensor
 #define maxDetectorTimeout 15
@@ -69,7 +69,7 @@ __code char OptionNames[maxOption+1][17] = {
 				 	 "Receiver Mode   ",
 				 	 "Reset settings  ",
 				 	 "LCD Contrast    ",
-				 	 "V1 2014-09-12   "};
+				 	 "V1 2014-09-14   "};
 
 __code char noyestext[2][4] = {" no", "yes"};
 
