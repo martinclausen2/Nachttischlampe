@@ -11,7 +11,7 @@
 #include <p89lpc935_6.h>
 #include <stdio.h>
 
-#define LCD
+//#define LCD
 
 #define KeyPressShort	20
 #define KeyPressLong	60

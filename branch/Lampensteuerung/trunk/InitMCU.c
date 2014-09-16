@@ -120,7 +120,7 @@ void InitMCU()
     	CCCRA = 0b00000001;	//output compare: non-inverted PWM for status LED
 	CCCRB = 0b00000001;	//output compare: non-inverted PWM for status LED
 	CCCRC = 0b00000001;	//output compare: non-inverted PWM for status LED
-	CCCRD = 0b00000001;	//output compare: non-inverted PWM for output
+	CCCRD = 0b00000011;	//output compare: inverted PWM for output
 
 				//Set pins to make CCU output visible
     	P2_6 = 1;		//blue LED
