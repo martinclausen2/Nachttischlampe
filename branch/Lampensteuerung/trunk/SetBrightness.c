@@ -22,19 +22,25 @@ unsigned int PWM_incr_cnt = 0;		//no of steps required to reach targed PWM value
 
 void PWM_Set()
 {
-	AD1DAT3 = ((PWM_setlimited >> 6) & 0x00FF);	// set analogue output
+	unsigned int temp;
 	if (PWM_setlimited)
 		{
+		temp = (unsigned int)PWM_setlimited + PWM_Offset;
+		if (maxRawPWM<temp)
+			{
+			temp=maxRawPWM;
+			}
 		// add min pulse width => we do not use full 16 bit resolution
 		// & reach PWM = 100% on for Brightness = 0x7F
-		OCRDH =  ((PWM_setlimited >> 6) & 0x00FF);
-		OCRDL = (((PWM_setlimited << 2) & 0x00FC) | 0x0003);
+		OCRDH =  ((temp >> 6) & 0x00FF);
+		OCRDL = (((temp << 2) & 0x00FC) | 0x0003);
 		}
 	else
 		{
 		OCRDH = 0;
 		OCRDL = 0;
 		}
+	AD1DAT3 = OCRDH;		//set analogue output
 	TCR21 = PLLSetting;	//Set PLL prescaler and start CCU register update
 }
 

@@ -198,7 +198,7 @@ void SetupContrast()
 }
 #endif
 
-void LCD_SetupRCAddress(unsigned char Address)	//Address will not be referenced if compiled without LCD define
+void LCD_SetupRCAddress(unsigned char Address)	//Address will not be referenced if compiled without LCD define, ignore warning
 {
 	#ifdef LCD
 	LCD_SendCmd(LCDSet2ndLine);

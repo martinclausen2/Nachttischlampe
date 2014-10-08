@@ -14,7 +14,7 @@ DAC and ADC can NOT be used at the same time, also if the DAC output is filtered
 #define RTCen	0b01100011
 #define RTCdis    0b01100000
 #define RTCIntfrequ	10	//frequency at which RTC timer generates an interrupt
-				//adjust RTC reload value
+				//adjust RTC reload value and number of cycles in mainloop
 
 #define P0M1def   0b00010011
 
@@ -77,7 +77,7 @@ void InitMCU()
 
 	#ifdef LCD
 	//Init SPI
-	//0,1 = 00 = CPUCLK/4 = 1,5MHz (max 3MHz)
+	//0,1 = 00 = CCLK/4 (max 3MHz)
 	//2 = 1 CLK Phase
 	//3 = 1 CLK Polarity
 	//4 = 1 Master
