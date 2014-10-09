@@ -7,9 +7,6 @@
  * V0 2014-08-31
  */
 
-// This file defines registers available in P89LPC93X
-#include <p89lpc935_6.h>
-
 #define BrightexpPointsToAvg	6	//points to average in 2^x format
 #define BrightInitCycles		0xFF	//at least 2^x
 

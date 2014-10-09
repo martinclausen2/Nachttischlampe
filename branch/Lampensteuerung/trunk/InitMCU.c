@@ -5,8 +5,8 @@ DAC and ADC can NOT be used at the same time, also if the DAC output is filtered
  */
 
 //Devide by last 4 Bit + 1; MSB is start signal
-//must reach target frequency of .5 to 1MHz from Osc / 2 
-#define PLLSetting  0b10000011
+//must reach target frequency of .5 to 1MHz from cclk / 2 / DIVM*2
+#define PLLSetting  0b10000001	//0 will not work, do not know why
 
 #define MCUIdle	0b00000001
 
@@ -18,8 +18,8 @@ DAC and ADC can NOT be used at the same time, also if the DAC output is filtered
 
 #define P0M1def   0b00010011
 
-#define DAC1	0b01001000	//ADC Clk  (0,5 to 3,3MHz allowed) Divisor 3 disable DAC0,  enable DAC1
-#define ADC1	0b01000000	//ADC Clk  (0,5 to 3,3MHz allowed) Divisor 3 disable DAC0, disable DAC1
+#define DAC1	0b00001000	//ADC Clk  (0,5 to 3,3MHz allowed) Divisor 1 disable DAC0,  enable DAC1
+#define ADC1	0b00000000	//ADC Clk  (0,5 to 3,3MHz allowed) Divisor 1 disable DAC0, disable DAC1
 
 #define DAC1Port  P0_4		//should be pulled low by an open drain output if not controlled by the DAC
 
@@ -27,7 +27,7 @@ void InitMCU()
 {
 	//Init MCU core
 	AUXR1=0b10000000;		//lower power consumption below 8 MHz
-	DIVM=0x00;		//run CPU at full speed
+	DIVM=0x02;		//run CPU at quarter RC oscilator speed
 	PCONA=0b00101010;		//Disable analog voltage comperators, I2C, UART
 
 	//Init port pins
@@ -98,9 +98,9 @@ void InitMCU()
 	//Read AD0DAT0, 1, 2, 3, 0, ...
 
 	//Init RTC of P89LPC93X
-	// config RTC as Timer with 7.373*10^6/128/40=1440 reload => 40Hz int source
-    	RTCH = 0x05; 
-    	RTCL = 0xA0;
+	// config RTC as Timer with 7.373*10^6/4/128/40=360 reload => 40Hz int source
+    	RTCH = 0x01; 
+    	RTCL = 0x68;
     	RTCCON = RTCdis;
 	//enable when configured
 
@@ -110,9 +110,9 @@ void InitMCU()
 	//Init CCU
     	TICR2  = 0b00000000;	//disable CCU interrupts
 	TPCR2H = 0b00000000;	//CCU prescaler, high byte
-                             	// Resonator / 2 / (PLLSetting+1) * PLL / (CCU prescaler+1) 
-                             	// 7.373MHz / 2 / 4 * 32 / 4 = 2^16 * 112.5 Hz
-	TPCR2L = 0b00000011;	//CCU prescaler, low byte
+                             	// Resonator / DIVM*2 / 2 / (PLLSetting+1) * PLL / (CCU prescaler+1) 
+                             	// 7.373MHz /       4 / 2 /              2 * 32 / 2                   = 2^16 * 112.5 Hz
+	TPCR2L = 0b00000001;	//CCU prescaler, low byte
 
 
 	TOR2H = 0xFF;		//Setup reload values for CCU timer, here 2^16-1
@@ -144,16 +144,16 @@ void InitMCU()
 
     	TCR20 = 0b10000110;	//Enable Asymmetrical PWM with down counting    
 
-	//Setup Timer 0 and Timer 1
+	//Setup Timer 0
 
     	// config Timer 0 for RC5 receiver
-    	// config Timer 1 for encoder decoding
-    	TMOD = 0b00000010;	//Init T0 (auto reload timer), T1 (8 bit counter with 1:32 prescaler form 450Hz at 7,373MHz clk)
-    	TCON = 0b01010000;	//gibt T0 & T1 frei
+    	// casacaded to encoder decoding
+    	TMOD = 0b00000010;	//Init T0 (auto reload timer)
+    	TCON = 0b00010000;	//gibt T0 frei
     	TH0 = 256-204;		//T0 high Byte => Reload-Wert
-        			       	//clk source is PCLK=CCLK/2, extended by Software with a 1:4 postscaler, effective frequency 4518Hz
+        			       	//clk source is PCLK=CCLK/2, frequency 4518Hz at 7,373MHz clk @ DIVM*2=4
 	//Init Int
-    	IEN0 = 0b11001010;	//Interupt internal RTC (Bit 6) enable
-    				//T0 and T1 enable
+    	IEN0 = 0b11000010;	//Interupt internal RTC (Bit 6) enable
+    				//T0 enable
     	RTCCON = RTCen;
 }

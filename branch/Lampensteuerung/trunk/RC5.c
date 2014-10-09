@@ -2,9 +2,9 @@
    call decoder state machine at 4499 Hz for four times oversampling of the 889µs demodulated RC5 signal pulses
  */
 
-#define IntT0reload 0x04			//T0 extension to clock RC5 receiver
-
 #define _RC5inp		P1_4		//define RC5 input pin
+
+#define EncoderReload	8		//divides 4,5KHz down to 500Hz
 
 #define RC5Addr_front	27		//address for frontlight brightness
 #define RC5Addr_back	28		//address for backligth brightness, MUST follow front address!
@@ -41,49 +41,53 @@ __code unsigned char tblRemote[] =
 
 void T0_isr(void) __interrupt(1)	__using(isrregisterbank)	//int from Timer 0 to read RC5 state
 {
-	__data static unsigned char IntT0Count;		//Verlängerung von T0
 	__data static unsigned char rc5state;
 	__bit static Rbit;				//Dedektiertes Bit von RC5
+	__data static unsigned char EncoderCounter;
 
-	--IntT0Count;
-	if (0==IntT0Count)
+	rc5state=rc5state<<1;
+	rc5state|=!_RC5inp;
+	rc5state=tblRemote[rc5state];
+	if (33==rc5state)				//Startsequenz erkannt?
 		{
-		IntT0Count=IntT0reload;			//Reload counter
-		rc5state=rc5state<<1;
-		rc5state|=!_RC5inp;
-		rc5state=tblRemote[rc5state];
-		if (33==rc5state)				//Startsequenz erkannt?
+		rCounter=0;			//alles zurücksetzen
+		rAddress=0;
+		rCommand=0;
+		}
+	else if ((42==rc5state) || (50==rc5state))	 //Erkanntes Bit einorden
+		{
+		if (42==rc5state)			//Nutzbit 1 erkannt?
 			{
-			rCounter=0;			//alles zurücksetzen
-			rAddress=0;
-			rCommand=0;
+			Rbit=1;
 			}
-		else if ((42==rc5state) || (50==rc5state))	 //Erkanntes Bit einorden
+		else if (50==rc5state)		//Nutzbit 0 erkannt?
 			{
-			if (42==rc5state)			//Nutzbit 1 erkannt?
-				{
-				Rbit=1;
-				}
-			else if (50==rc5state)		//Nutzbit 0 erkannt?
-				{
-				Rbit=0;
-				}
-    			++rCounter;			//Da neues Bit ...
-			if (1==rCounter)
-  				{
-  				RTbit=Rbit;
-  				}
-			else if (7>rCounter)		//Adressbit
-				{
-  				rAddress=rAddress<<1;
-  				rAddress|=Rbit;
-  				}
-			else				//Commandbit
-				{
-  				rCommand=rCommand<<1;
-  				rCommand|=Rbit;
-  				}
+			Rbit=0;
 			}
+   			++rCounter;			//Da neues Bit ...
+		if (1==rCounter)
+ 				{
+ 				RTbit=Rbit;
+ 				}
+		else if (7>rCounter)		//Adressbit
+			{
+ 				rAddress=rAddress<<1;
+ 				rAddress|=Rbit;
+ 				}
+		else				//Commandbit
+			{
+ 				rCommand=rCommand<<1;
+ 				rCommand|=Rbit;
+ 				}
+		}
+	if (EncoderCounter)
+		{
+		EncoderCounter--;
+		}
+	else
+		{
+		EncoderCounter=EncoderReload;
+		Encoder();
 		}
 }
 

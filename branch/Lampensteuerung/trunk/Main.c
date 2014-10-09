@@ -20,7 +20,6 @@
 #define isrregisterbank	2		//for all isr on the SAME priority level 
 
 void T0_isr(void) __interrupt (1);		//int from Timer 0 to read RC5 state
-void T1_isr(void) __interrupt (3);		//int from Timer 1 to read encoder state
 void WDT_RTC_isr(void) __interrupt (10);	//int from internal RTC to update PWM, read keys, ...
 
 __bit volatile TimerFlag;

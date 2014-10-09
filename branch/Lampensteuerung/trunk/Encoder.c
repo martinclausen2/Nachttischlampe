@@ -4,6 +4,7 @@
  * The calling frequency should not be to low, because otherwise the
  * state machine will be the confused by contact bouncing
  * e.g. T1 as 8 bit counter with 1:32 prescaler form 366Hz at 6MHz clk
+ * or daisy chained with software timer from RC5 decoder
  * adding RC-filter may help to keep the calling frequency down
  *
  * A Rotation occured if 0!=EncoderSteps
@@ -16,9 +17,6 @@
 //	EncoderSteps=0;
 // }
 */
-
-// This file defines registers available in P89LPC93X
-#include <p89lpc935_6.h>
 
 // Encoder and Keys should not overlap in their bits
 #define EncoderPort	P1		//select port with encoder
@@ -59,7 +57,7 @@ __code unsigned char tblEncoder[] = {
 
 volatile signed char EncoderSteps;
 
-void T1_isr(void) __interrupt(3) __using(isrregisterbank)
+void Encoder()
 {
 	static unsigned char EncoderState;	//stores the encoder state machine state
 	static unsigned char OldEncoderState;
@@ -153,5 +151,4 @@ unsigned char EncoderSetupValue(unsigned char *Value, unsigned char maxValue, un
 		returnval = 0;
 		}
 	return returnval;
-
 }

@@ -43,8 +43,6 @@
 #define maxAlarmEndMode 4
 #define maxComMode 3
 
-#define menutimeout 184630			//timeout = 10s defined by RC5 irq frequency
-
 unsigned int AlarmDim_Cnt = 0;
 unsigned int AlarmDim_Cnt_Reload = 0;
 
@@ -69,7 +67,7 @@ __code char OptionNames[maxOption+1][17] = {
 				 	 "Receiver Mode   ",
 				 	 "Reset settings  ",
 				 	 "LCD Contrast    ",
-				 	 "V1 2014-09-15   "};
+				 	 "V1 2014-10-09   "};
 
 __code char noyestext[2][4] = {" no", "yes"};
 
