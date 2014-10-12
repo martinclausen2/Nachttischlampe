@@ -51,11 +51,8 @@ void T0_isr(void) __interrupt(1)	__using(isrregisterbank)	//int from Timer 0 to 
 		{
 		IntT0Count=IntT0reload;			//Reload counter
 		rc5state=rc5state<<1;
-		if (0==_RC5inp)				//insert inverted input
-			{
-			rc5state|=1;
-			}
-		rc5state=tblRemote[rc5state];
+		rc5state|=!_RC5inp;			//Insert inverted input
+		rc5state=tblRemote[rc5state];		//get next state
 		if (33==rc5state)				//Startsequenz erkannt?
 			{
 			rCounter=0;			//alles zurücksetzen
@@ -253,6 +250,20 @@ void SetBrightnessRemote(unsigned char i)
 		}
 }
 
+void SetBrightnessLevelRemote()
+{
+	if (rCommand<=5)
+		{
+		Brightness[1]=(((unsigned int)rCommand*(unsigned int)maxBrightness)/5) & maxBrightness;
+		SetLightRemote(0,0);
+		}
+	else if (rCommand<=10)
+		{
+		Brightness[2]=(((unsigned int)(rCommand-5)*(unsigned int)maxBrightness)/5) & maxBrightness;
+		SetLightRemote(1,0);
+		}
+}
+
 void DecodeRemote()
 {
 	__bit static RTbitold;				//Togglebit des letzten Befehls von RC5
@@ -265,16 +276,18 @@ void DecodeRemote()
 				{
 				switch (rCommand)
 					{
-					case 1:
 					case 12:			//Standby
 						SwAllLightOn();
 						break;
 					case 13:			//mute
 						SwAllLightOff();
 						break;
+					default:
+						SetBrightnessLevelRemote();
+						break;
 	  				}
 				}
-	
+
 	  		switch (rCommand)			//new or same key pressed
 	  			{
 	  			case 16:				//incr vol
