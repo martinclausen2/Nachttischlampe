@@ -196,7 +196,7 @@ void Alarm()
 			}
 		else
 			{
-			LCD_SendString2ndLine(&Alarmtext[0]);
+			LCD_SendStringFill2ndLine(&Alarmtext[0]);
 			}
 		}
 }
