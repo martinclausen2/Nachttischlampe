@@ -7297,6 +7297,54 @@ Source: http://catalog.osram-os.com .. LG_LS_LY_T679_OBS.pdf</description>
 </deviceset>
 </devicesets>
 </library>
+<library name="wirepad">
+<description>&lt;b&gt;Single Pads&lt;/b&gt;&lt;p&gt;
+&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
+<packages>
+<package name="1,6/0,8">
+<description>&lt;b&gt;THROUGH-HOLE PAD&lt;/b&gt;</description>
+<wire x1="-0.762" y1="0.762" x2="-0.508" y2="0.762" width="0.1524" layer="21"/>
+<wire x1="-0.762" y1="0.762" x2="-0.762" y2="0.508" width="0.1524" layer="21"/>
+<wire x1="0.762" y1="0.762" x2="0.762" y2="0.508" width="0.1524" layer="21"/>
+<wire x1="0.762" y1="0.762" x2="0.508" y2="0.762" width="0.1524" layer="21"/>
+<wire x1="0.762" y1="-0.508" x2="0.762" y2="-0.762" width="0.1524" layer="21"/>
+<wire x1="0.762" y1="-0.762" x2="0.508" y2="-0.762" width="0.1524" layer="21"/>
+<wire x1="-0.508" y1="-0.762" x2="-0.762" y2="-0.762" width="0.1524" layer="21"/>
+<wire x1="-0.762" y1="-0.762" x2="-0.762" y2="-0.508" width="0.1524" layer="21"/>
+<circle x="0" y="0" radius="0.635" width="0.1524" layer="51"/>
+<pad name="1" x="0" y="0" drill="0.8128" diameter="1.6002" shape="octagon"/>
+<text x="-0.762" y="1.016" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="0" y="0.6" size="0.0254" layer="27">&gt;VALUE</text>
+</package>
+</packages>
+<symbols>
+<symbol name="PAD">
+<wire x1="-1.016" y1="1.016" x2="1.016" y2="-1.016" width="0.254" layer="94"/>
+<wire x1="-1.016" y1="-1.016" x2="1.016" y2="1.016" width="0.254" layer="94"/>
+<text x="-1.143" y="1.8542" size="1.778" layer="95">&gt;NAME</text>
+<text x="-1.143" y="-3.302" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="P" x="2.54" y="0" visible="off" length="short" direction="pas" rot="R180"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="1,6/0,8" prefix="PAD" uservalue="yes">
+<description>&lt;b&gt;THROUGH-HOLE PAD&lt;/b&gt;</description>
+<gates>
+<gate name="P" symbol="PAD" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="1,6/0,8">
+<connects>
+<connect gate="P" pin="P" pad="1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -7380,6 +7428,8 @@ Source: http://catalog.osram-os.com .. LG_LS_LY_T679_OBS.pdf</description>
 <part name="R21" library="rcl" deviceset="R-EU_" device="R0805" value="22k"/>
 <part name="R22" library="rcl" deviceset="R-EU_" device="R0805" value="22k"/>
 <part name="SUPPLY5" library="supply2" deviceset="+UB" device=""/>
+<part name="PAD1" library="wirepad" deviceset="1,6/0,8" device="" value="GND"/>
+<part name="PAD2" library="wirepad" deviceset="1,6/0,8" device="" value="Out"/>
 </parts>
 <sheets>
 <sheet>
@@ -7394,6 +7444,7 @@ Source: http://catalog.osram-os.com .. LG_LS_LY_T679_OBS.pdf</description>
 <text x="165.1" y="-27.94" size="1.778" layer="91">Alternativ R4 (analog) oder
 R17, R18, R19, Q4 (PWM)
 bestücken</text>
+<text x="111.76" y="-38.1" size="1.778" layer="91">100k bei Betrieb mit 3,3V</text>
 </plain>
 <instances>
 <instance part="U$1" gate="G$1" x="50.8" y="55.88" rot="MR0"/>
@@ -7489,6 +7540,8 @@ bestücken</text>
 <instance part="R21" gate="G$1" x="66.04" y="121.92" rot="R90"/>
 <instance part="R22" gate="G$1" x="71.12" y="121.92" rot="R90"/>
 <instance part="SUPPLY5" gate="G$1" x="71.12" y="134.62"/>
+<instance part="PAD1" gate="P" x="152.4" y="-22.86" rot="R270"/>
+<instance part="PAD2" gate="P" x="147.32" y="5.08" rot="R270"/>
 </instances>
 <busses>
 </busses>
@@ -7604,12 +7657,16 @@ bestücken</text>
 <wire x1="160.02" y1="-12.7" x2="162.56" y2="-12.7" width="0.1524" layer="91"/>
 <pinref part="Q4" gate="G$1" pin="E"/>
 <wire x1="147.32" y1="-22.86" x2="147.32" y2="-40.64" width="0.1524" layer="91"/>
-<wire x1="147.32" y1="-40.64" x2="160.02" y2="-40.64" width="0.1524" layer="91"/>
+<wire x1="147.32" y1="-40.64" x2="152.4" y2="-40.64" width="0.1524" layer="91"/>
 <pinref part="R19" gate="G$1" pin="1"/>
+<wire x1="152.4" y1="-40.64" x2="160.02" y2="-40.64" width="0.1524" layer="91"/>
 <wire x1="139.7" y1="-30.48" x2="139.7" y2="-40.64" width="0.1524" layer="91"/>
 <wire x1="139.7" y1="-40.64" x2="147.32" y2="-40.64" width="0.1524" layer="91"/>
 <junction x="147.32" y="-40.64"/>
 <junction x="160.02" y="-40.64"/>
+<pinref part="PAD1" gate="P" pin="P"/>
+<wire x1="152.4" y1="-25.4" x2="152.4" y2="-40.64" width="0.1524" layer="91"/>
+<junction x="152.4" y="-40.64"/>
 </segment>
 <segment>
 <pinref part="SV1" gate="G$1" pin="2"/>
@@ -7943,6 +8000,9 @@ bestücken</text>
 <pinref part="R17" gate="G$1" pin="1"/>
 <junction x="147.32" y="-7.62"/>
 <wire x1="147.32" y1="-7.62" x2="147.32" y2="-2.54" width="0.1524" layer="91"/>
+<pinref part="PAD2" gate="P" pin="P"/>
+<wire x1="147.32" y1="2.54" x2="147.32" y2="-2.54" width="0.1524" layer="91"/>
+<junction x="147.32" y="-2.54"/>
 </segment>
 </net>
 <net name="N$23" class="0">
