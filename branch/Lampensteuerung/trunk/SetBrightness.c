@@ -124,10 +124,12 @@ void PWM_SetupDim(signed int PWM_dimsteps, signed char Steps)
 	if (maxBrightness < temp)		//avoid overflow
 		{
 		temp = maxBrightness;
+		LEDSetupMaxLimit();
 		}
 	else if (0 > temp) 
 		{
 		temp = 0;
+		LEDSetupMinLimit();
 		}
 	Brightness = temp;
 

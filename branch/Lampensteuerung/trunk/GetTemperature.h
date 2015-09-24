@@ -18,9 +18,11 @@
 #define TempOffset	13	// in °C
 
 #define TempLimit		130	//onset of output limiting in ADC counts
+				//130 counts = 70°C
 #define TempMax		175	//Temperature switch off in ADC counts
+				//175 counts = 90°C
 				//must go below TempLimit before reenabled
-#define TempDerating	5	//kehrwert Differenznormierung in 1/256
+#define TempDerating	5	//Kehrwert Differenznormierung in 1/256
 
 #define maxDisplayTimer	0xFF
 

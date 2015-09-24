@@ -11,6 +11,8 @@
 #include <p89lpc935_6.h>
 #include <stdio.h>
 
+#define noninvertedPWM
+
 //#define LCD
 
 #define KeyPressShort	20
@@ -134,8 +136,9 @@ void main()
 				case 1:
 					if (LightOn)
 						{
-						StoreBrightness();	// store brightness if reuqired
+						StoreBrightness();	// store brightness if required
 						Alarm_StepDim();		// do next alarm dim step if required
+						LEDLimit();
 						}
 					else
 						{

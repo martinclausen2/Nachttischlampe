@@ -111,16 +111,23 @@ void InitMCU()
     	TICR2  = 0b00000000;	//disable CCU interrupts
 	TPCR2H = 0b00000000;	//CCU prescaler, high byte
                              	// Resonator / DIVM*2 / 2 / (PLLSetting+1) * PLL / (CCU prescaler+1) 
-                             	// 7.373MHz /       4 / 2 /              2 * 32 / 2                   = 2^16 * 112.5 Hz
-	TPCR2L = 0b00000001;	//CCU prescaler, low byte
-
+                             	// 7.373MHz /       4 / 2 /              2 * 32 / 1                   = 2^16 * 225 Hz
+#ifdef noninvertedPWM
+	TPCR2L = 0b00000000;	//CCU prescaler, low byte for direct drive with 225 Hz PWM
+#else
+	TPCR2L = 0b00000011;	//CCU prescaler, low byte for control with 56.25 Hz PWM
+#endif
 
 	TOR2H = 0xFF;		//Setup reload values for CCU timer, here 2^16-1
     	TOR2L = 0xFF;
     	CCCRA = 0b00000001;	//output compare: non-inverted PWM for status LED
 	CCCRB = 0b00000001;	//output compare: non-inverted PWM for status LED
 	CCCRC = 0b00000001;	//output compare: non-inverted PWM for status LED
+#ifdef noninvertedPWM
+	CCCRD = 0b00000001;	//output compare: non-inverted PWM for output
+#else
 	CCCRD = 0b00000011;	//output compare: inverted PWM for output
+#endif
 
 				//Set pins to make CCU output visible
     	P2_6 = 1;		//blue LED

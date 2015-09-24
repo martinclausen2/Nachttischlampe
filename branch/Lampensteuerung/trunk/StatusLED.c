@@ -86,6 +86,34 @@ void LEDTempReset()
 	BlueLEDPort = 1;
 }
 
+void LEDLimit()		//blanks LED to indicate brightness limit
+{
+	if (LEDLimitFlashTimer)
+		{
+		--LEDLimitFlashTimer;
+		if (0==LEDLimitFlashTimer)	//Restore LED status
+			{
+			BlueLEDPort = 1;
+			GreenLEDPort = 1;
+			RedLEDPort = 1;
+			}
+		}
+}
+
+void LEDSetupMinLimit()
+{
+	LEDLimitFlashTimer = LEDmaxLimitFlashTimer;
+	BlueLEDPort = 0;
+	GreenLEDPort = 0;
+}
+
+void LEDSetupMaxLimit()
+{
+	LEDLimitFlashTimer = LEDmaxLimitFlashTimer;
+	BlueLEDPort = 0;
+	RedLEDPort = 0;
+}
+
 void LEDFlashing()		//flashes the blue LED to indicate current option
 {
 	unsigned char static LEDFlashTimer;	//Software timer to decouple flashing frequency from calling frequency
