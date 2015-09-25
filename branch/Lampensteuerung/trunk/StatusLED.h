@@ -8,10 +8,11 @@ Controls Status LED connected to OCA (blue), OCB (green), OCC (red)
 unsigned char LEDFlashCount;	//Number of flashes currently required, should not exceed 0x7F ...
 unsigned char LEDFlashSeqCounter;	//Number of flashes * 2 (on & off) to be produced in this sequence
 unsigned char LEDLimitFlashTimer;	//Software timer to decouple flashing frequency from calling frequency
+__bit LEDTempOn;			//Flag to indicate active temperature control, required for LED control
 
 #define LEDFlashMaxSeq	8	//max. number of flashes in a squence, should not exceed 0x7F ...
 #define LEDmaxFlashTimer	4	//cycles to execute before next flash toggel happens
-#define LEDmaxLimitFlashTimer	0xFF	//cycles to execute before LED status is restored
+#define LEDmaxLimitFlashTimer 4	//cycles to execute before LED status is restored
 
 #define BlueLEDPort 	P2_6
 #define GreenLEDPort 	P1_6

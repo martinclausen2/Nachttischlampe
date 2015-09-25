@@ -1,5 +1,4 @@
 /** Int routine for rotational encoder
- * V0 2013-01-15
  *
  * The calling frequency should not be to low, because otherwise the
  * state machine will be the confused by contact bouncing
@@ -28,7 +27,7 @@
 #define SelEncoderAccel	0x7F		//depends of ShiftEncoderAccel
 #define maxEncoderSteps	100		//avoid overflow
 #define minEncoderSteps	-100
-#define EncoderAccelStep	0x01		//depends on caling frequency of encoder decode function and required acceleration
+#define EncoderAccelStep	0x03		//depends on caling frequency of encoder decode function and required acceleration
 #define maxEncoderAccel    0xFF
 #define startEncoderDecay	0xAF		//start value for decrementing accelleration, depends on calling frequency
 

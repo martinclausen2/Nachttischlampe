@@ -49,6 +49,7 @@ void LEDOverTemp()		//flashes red LED to indicate overtemperature
 {
 	unsigned char static LEDFlashTimer;	//Software timer to decouple flashing frequency from calling frequency
 	__bit static Status;
+	LEDTempOn = 1;
 	if (LEDFlashTimer)
 		{
 		--LEDFlashTimer;
@@ -66,6 +67,7 @@ void LEDTempDerating()		//flashes green & blue LED to indicate temperature derat
 {
 	unsigned char static LEDFlashTimer;	//Software timer to decouple flashing frequency from calling frequency
 	__bit static Status;
+	LEDTempOn = 1;
 	if (LEDFlashTimer)
 		{
 		--LEDFlashTimer;
@@ -81,9 +83,13 @@ void LEDTempDerating()		//flashes green & blue LED to indicate temperature derat
 
 void LEDTempReset()
 {
-	RedLEDPort = 1;
-	GreenLEDPort = 1;
-	BlueLEDPort = 1;
+	if (LEDTempOn)
+		{
+		RedLEDPort = 1;
+		GreenLEDPort = 1;
+		BlueLEDPort = 1;
+		LEDTempOn = 0;
+		}
 }
 
 void LEDLimit()		//blanks LED to indicate brightness limit
