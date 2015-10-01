@@ -13,7 +13,7 @@
 
 #define noninvertedPWM
 
-//#define LCD
+#define LCD
 
 #define KeyPressShort	20
 #define KeyPressLong	60
@@ -35,6 +35,7 @@ __bit enableExtBrightness;
 #endif
 #include "StatusLED.h"
 #include "GetTemperature.h"
+#include "SetBrightness.h"
 
 #include "EEPROM.c"
 #include "InitMCU.c"
@@ -205,6 +206,7 @@ void main()
 							{
 							PWM_SetupDim(Brightness_steps, EncoderSteps);
 							EncoderSteps = 0;								//ack any steps
+							LEDSetupLimit();
 							LCD_SendBrightness();
 							WriteTimer=WriteTime;
 							}

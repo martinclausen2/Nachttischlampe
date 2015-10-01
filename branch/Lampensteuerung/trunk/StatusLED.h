@@ -11,7 +11,7 @@ unsigned char LEDLimitFlashTimer;	//Software timer to decouple flashing frequenc
 __bit LEDTempOn;			//Flag to indicate active temperature control, required for LED control
 
 #define LEDFlashMaxSeq	8	//max. number of flashes in a squence, should not exceed 0x7F ...
-#define LEDmaxFlashTimer	4	//cycles to execute before next flash toggel happens
+#define LEDmaxFlashTimer	6	//cycles to execute before next flash toggel happens
 #define LEDmaxLimitFlashTimer 4	//cycles to execute before LED status is restored
 
 #define BlueLEDPort 	P2_6
@@ -50,9 +50,7 @@ void LEDOvertemp();
 
 void LEDLimit();
 
-void LEDSetupMinLimit();
-
-void LEDSetupMaxLimit();
+void LEDSetupLimit();
 
 void LEDFlashing();
 

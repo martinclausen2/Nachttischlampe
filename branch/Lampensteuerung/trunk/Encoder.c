@@ -27,9 +27,9 @@
 #define SelEncoderAccel	0x7F		//depends of ShiftEncoderAccel
 #define maxEncoderSteps	100		//avoid overflow
 #define minEncoderSteps	-100
-#define EncoderAccelStep	0x03		//depends on caling frequency of encoder decode function and required acceleration
+#define EncoderAccelStep	0x02		//depends on caling frequency of encoder decode function and required acceleration
 #define maxEncoderAccel    0xFF
-#define startEncoderDecay	0xAF		//start value for decrementing accelleration, depends on calling frequency
+#define startEncoderDecay	0x3F		//start value for decrementing accelleration, depends on calling frequency
 
 /** State Machine table for rotational encoder
    Format: IN  ACC.0 inc

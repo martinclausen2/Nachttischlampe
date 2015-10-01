@@ -106,18 +106,20 @@ void LEDLimit()		//blanks LED to indicate brightness limit
 		}
 }
 
-void LEDSetupMinLimit()
+void LEDSetupLimit()
 {
-	LEDLimitFlashTimer = LEDmaxLimitFlashTimer;
-	BlueLEDPort = 0;
-	GreenLEDPort = 0;
-}
-
-void LEDSetupMaxLimit()
-{
-	LEDLimitFlashTimer = LEDmaxLimitFlashTimer;
-	BlueLEDPort = 0;
-	RedLEDPort = 0;
+	if (maxLimit == limit)
+		{
+		LEDLimitFlashTimer = LEDmaxLimitFlashTimer;
+		BlueLEDPort = 0;
+		RedLEDPort = 0;
+		}
+	else if (minLimit == limit)
+		{
+		LEDLimitFlashTimer = LEDmaxLimitFlashTimer;
+		BlueLEDPort = 0;
+		GreenLEDPort = 0;
+		}
 }
 
 void LEDFlashing()		//flashes the blue LED to indicate current option

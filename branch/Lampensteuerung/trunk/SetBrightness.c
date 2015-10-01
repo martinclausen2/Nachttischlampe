@@ -2,24 +2,6 @@
  *  Hardware CCU of P89LPC93X
  */
 
-#define maxBrightness	0x7F		//avoid overflow with signed numbers, should be filled with 1 from MSB to LSB
-#define maxRawPWM		0x3FFF		// =  maxBrigntess^2
-#define fadetime		150
-
-#define WriteTime		0xFF		//time until new brightness value is saved to the eeprom
-
-unsigned char WriteTimer = 0;		//time until Brightness is saved in calls to StoreBrightness()
-
-unsigned char Brightness = 0;		//current value
-unsigned char Brightness_start;		//value before lights off
-unsigned int PWM_Offset = 0;		//PWM value, where the driver effectivly starts to generate an output
-unsigned int ExtBrightness_last;		//external brigthness during lights off divided by 256
-
-signed int PWM_set = 0;			//current pwm value
-signed int PWM_setlimited = 0;		//current pwm value after limiter
-signed int PWM_incr = 0;			//pwm dimming step size
-unsigned int PWM_incr_cnt = 0;		//no of steps required to reach targed PWM value
-
 void PWM_Set()
 {
 	unsigned int temp;
@@ -120,16 +102,17 @@ void PWM_StepDim()		// perform next dimming step, must frquently called for dimm
 void PWM_SetupDim(signed int PWM_dimsteps, signed char Steps)
 {
 	signed int temp;
+	limit=0;
 	temp = Brightness + Steps;
 	if (maxBrightness < temp)		//avoid overflow
 		{
 		temp = maxBrightness;
-		LEDSetupMaxLimit();
+		limit = maxLimit;
 		}
 	else if (0 > temp) 
 		{
 		temp = 0;
-		LEDSetupMinLimit();
+		limit = minLimit;
 		}
 	Brightness = temp;
 
