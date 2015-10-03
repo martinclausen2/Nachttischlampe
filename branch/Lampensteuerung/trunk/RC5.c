@@ -94,7 +94,7 @@ void T0_isr(void) __interrupt(1)	__using(isrregisterbank)	//int from Timer 0 to 
 //setup brightness values
 void SetLightRemote(signed char steps)
 {
-	PWM_SetupDim(Brightness_steps, steps, Brightness_Offset);
+	PWM_SetupDim(Brightness_steps, steps, 1);
 	LEDSetupLimit();
 	SendBrightness();
 	WriteTimer=WriteTime;

@@ -11,7 +11,7 @@
 #include <p89lpc935_6.h>
 #include <stdio.h>
 
-#define noninvertedPWM
+//#define noninvertedPWM
 
 //#define LCD
 
@@ -204,7 +204,7 @@ void main()
 						Alarmflag=0;
 						if (LightOn)
 							{
-							PWM_SetupDim(Brightness_steps, EncoderSteps, Brightness_Offset);
+							PWM_SetupDim(Brightness_steps, EncoderSteps, 1);
 							EncoderSteps = 0;								//ack any steps
 							LEDSetupLimit();
 							LCD_SendBrightness();

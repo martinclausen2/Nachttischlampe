@@ -20,7 +20,6 @@ unsigned char limit;		//was brightness limit reached during last calculation?
 unsigned char Brightness;		//current value
 unsigned char Brightness_start;	//value before lights off
 unsigned int PWM_Offset;		//PWM value, where the driver effectivly starts to generate an output
-unsigned char Brightness_Offset;	//Brightness value, where the driver effectivly starts to generate an output
 unsigned int ExtBrightness_last;	//external brigthness during lights off divided by 256
 
 signed int PWM_set;		//current pwm value

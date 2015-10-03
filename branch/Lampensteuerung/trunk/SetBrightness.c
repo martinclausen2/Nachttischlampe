@@ -48,8 +48,8 @@ void SendBrightness()
 
 void Update_PWM_Offset()
 {
-	Brightness_Offset = Read_EEPROM(EEAddr_OffsetFrontBrightness);
-	PWM_Offset = Brightness_Offset*Brightness_Offset;
+	PWM_Offset = Read_EEPROM(EEAddr_OffsetFrontBrightness);
+	PWM_Offset *= PWM_Offset;
 }
 
 void InitBrightness()
