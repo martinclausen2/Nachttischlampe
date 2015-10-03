@@ -13,7 +13,7 @@
 
 #define noninvertedPWM
 
-#define LCD
+//#define LCD
 
 #define KeyPressShort	20
 #define KeyPressLong	60
@@ -204,7 +204,7 @@ void main()
 						Alarmflag=0;
 						if (LightOn)
 							{
-							PWM_SetupDim(Brightness_steps, EncoderSteps);
+							PWM_SetupDim(Brightness_steps, EncoderSteps, Brightness_Offset);
 							EncoderSteps = 0;								//ack any steps
 							LEDSetupLimit();
 							LCD_SendBrightness();

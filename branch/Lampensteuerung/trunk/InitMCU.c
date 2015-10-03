@@ -115,7 +115,7 @@ void InitMCU()
 #ifdef noninvertedPWM
 	TPCR2L = 0b00000000;	//CCU prescaler, low byte for direct drive with 225 Hz PWM
 #else
-	TPCR2L = 0b00000011;	//CCU prescaler, low byte for control with 56.25 Hz PWM
+	TPCR2L = 0b00000001;	//CCU prescaler, low byte for control with 112.5 Hz PWM
 #endif
 
 	TOR2H = 0xFF;		//Setup reload values for CCU timer, here 2^16-1

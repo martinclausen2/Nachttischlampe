@@ -24,11 +24,11 @@
 #define KeyIncr		0b00000001
 #define KeyDecr		0b00000010
 #define ShiftEncoderAccel	0x02		//max 7, depends on caling frequency of encoder decode function and required acceleration
-#define SelEncoderAccel	0x3F		//depends of ShiftEncoderAccel
-#define maxEncoderSteps	100		//avoid overflow
-#define minEncoderSteps	-100
+#define SelEncoderAccel	0x3F		//depends on ShiftEncoderAccel, should mask lsbs shifted to msb
+#define maxEncoderSteps	90		//avoid overflow, must be smaller than 0x7F - accellerated steps to be added, see also maxEncoderAccel
+#define minEncoderSteps	-90
 #define EncoderAccelStep	0x03		//depends on caling frequency of encoder decode function and required acceleration
-#define maxEncoderAccel    0xFF
+#define maxEncoderAccel    0x7F		//avoid overflow, must be smaller than 0xFF - EncoderAccleStep and (0x7F - maxEncoderSteps) * 2^ShiftEncoderAccel = 148
 #define startEncoderDecay	0x7F		//start value for decrementing accelleration, depends on calling frequency
 
 /** State Machine table for rotational encoder

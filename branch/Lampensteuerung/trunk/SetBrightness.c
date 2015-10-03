@@ -48,8 +48,8 @@ void SendBrightness()
 
 void Update_PWM_Offset()
 {
-	PWM_Offset = Read_EEPROM(EEAddr_OffsetFrontBrightness);
-	PWM_Offset *= PWM_Offset;
+	Brightness_Offset = Read_EEPROM(EEAddr_OffsetFrontBrightness);
+	PWM_Offset = Brightness_Offset*Brightness_Offset;
 }
 
 void InitBrightness()
@@ -99,7 +99,7 @@ void PWM_StepDim()		// perform next dimming step, must frquently called for dimm
 		}
 }
 
-void PWM_SetupDim(signed int PWM_dimsteps, signed char Steps)
+void PWM_SetupDim(signed int PWM_dimsteps, signed char Steps, signed int minBrightness)
 {
 	signed int temp;
 	limit=0;
@@ -109,9 +109,9 @@ void PWM_SetupDim(signed int PWM_dimsteps, signed char Steps)
 		temp = maxBrightness;
 		limit = maxLimit;
 		}
-	else if (0 > temp) 
+	else if (minBrightness > temp) 
 		{
-		temp = 0;
+		temp = minBrightness;
 		limit = minLimit;
 		}
 	Brightness = temp;
@@ -140,7 +140,7 @@ void PWM_SetupDim(signed int PWM_dimsteps, signed char Steps)
 
 void PWM_SetupNow(signed char Steps)
 {
-	PWM_SetupDim(1, Steps);
+	PWM_SetupDim(1, Steps, 0);
 	PWM_StepDim();
 	LimitOutput();
 	PWM_Set();
@@ -201,7 +201,7 @@ void SwLightOn()
 			{
 			Brightness = temp;				// or just take the calculated value!
 			}
-		PWM_SetupDim(fadetime, 0);
+		PWM_SetupDim(fadetime, 0, 0);
 		LimitOutput();
 		SendBrightness();
 		}
@@ -215,7 +215,7 @@ void SwLightOff()
 		Alarmflag=0;
 		Brightness_start=Brightness;
 		Brightness=0;
-		PWM_SetupDim(fadetime, 0);
+		PWM_SetupDim(fadetime, 0, 0);
 		SetExtBrightness_last();
 		#ifdef LCD
 		LCD_SendStringFill2ndLine("Standby");
@@ -227,13 +227,13 @@ void SwLightOff()
 void SwLightOnMax()
 {
 	Brightness = maxBrightness;
-	PWM_SetupDim(fadetime, 0);
+	PWM_SetupDim(fadetime, 0, 0);
 	SendBrightness();
 }
 
 void SwLightOnMin()
 {
 	Brightness = Read_EEPROM(EEAddr_MinimumFrontBrightness);
-	PWM_SetupDim(fadetime, 0);
+	PWM_SetupDim(fadetime, 0, 0);
 	SendBrightness();
 }

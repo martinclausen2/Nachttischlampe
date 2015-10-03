@@ -20,7 +20,7 @@ void Alarm_StepDim()
 			if (Brightness < Read_EEPROM(EEAddr_AlarmFrontBrightness))
 				{
 				AlarmDim_Cnt=AlarmDim_Cnt_Reload;	//reload countdown
-				PWM_SetupDim(Brightness_steps, 1);	//setup brightness
+				PWM_SetupDim(Brightness_steps, 1, 0);	//setup brightness
 				}
 			else
 				{
