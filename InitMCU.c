@@ -94,7 +94,7 @@ void InitMCU()
 	ADCON0 = 0b00000100; //Enable ADC&DAC 0 immediate start
 	ADCON1 = 0b00000100; //Enable ADC&DAC 1 immediate start
 	ADMODA = 0b00000011; //Fixed channel, single conversion mode for ADC0
-	ADMODB = 0b00101000; //ADC Clk  (0,5 to 3,3MHz allowed) Divisor 2 = 3MHz at 6MHz, disable DAC0, enable DAC1
+	ADMODB = 0b01101000; //ADC Clk  (0,5 to 3,3MHz allowed) Divisor 2 = 3MHz at 6MHz, disable DAC0, enable DAC1
 	//Write DAC data to AD1DAT3
 	//Write 1 to LSB of ADCON0 to start conversation
 	//Read AD0DAT0, 1, 2, 3, 0, ...
